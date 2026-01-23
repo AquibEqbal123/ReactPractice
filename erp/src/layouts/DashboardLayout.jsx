@@ -1,0 +1,78 @@
+import { Link, Outlet } from "react-router-dom";
+import {
+  FaChartLine,
+  FaUsers,
+  FaBoxes,
+  FaShoppingCart,
+  FaSignOutAlt,
+  FaUserTie,
+  FaTasks,
+} from "react-icons/fa";
+import { logout } from "../utils/auth";
+import { useNavigate } from "react-router-dom";
+import { FaCalendarCheck } from "react-icons/fa";
+
+
+export default function DashboardLayout() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen flex bg-gray-100">
+
+      {/* SIDEBAR */}
+      <aside className="w-64 bg-gray-900 text-white flex flex-col">
+        {/* <img src="src/assets/Images/p4.jpg" alt="logo" className="w-10 h-10 mt-4 ml-9 rounded-full" />
+        <div className="pl-3">Fule IT Online</div>
+        <div className="p-4 text-2xl font-bold border-b border-gray-700">
+          Admin Panel
+        </div> */}
+        <div className="mb-3 text-center">
+          <h1 className="font-semibold text-xl text-gray-800 dark:text-white">Admin Panal</h1>
+        </div>
+
+        <nav className="flex-1 p-3 space-y-2 text-sm">
+          <NavItem to="/dashboard" icon={<FaChartLine />} text="Dashboard" />
+          <NavItem to="/employees" icon={<FaUsers />} text="Employees" />
+          <NavItem to="/inventory" icon={<FaBoxes />} text="Inventory" />
+          <NavItem to="/sales" icon={<FaShoppingCart />} text="Sales" />
+          <NavItem
+            to="/admin/leaves"
+            icon={<FaCalendarCheck />}
+            text="Leave Requests"
+          />
+            <NavItem to="/assign-tasks" icon={<FaTasks />} text="Assign Tasks" />
+            <NavItem to="/departments" icon={<FaUserTie />} text="Departments" />
+
+        </nav>
+
+        <button
+          onClick={() => {
+            logout();
+            navigate("/");
+          }}
+          className="m-4 flex items-center gap-2 text-red-400 hover:text-red-300"
+        >
+          <FaSignOutAlt />
+          Logout
+        </button>
+      </aside>
+
+      {/* RIGHT CONTENT */}
+      <main className="flex-1 p-6">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+
+function NavItem({ to, icon, text }) {
+  return (
+    <Link
+      to={to}
+      className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-800"
+    >
+      {icon}
+      <span>{text}</span>
+    </Link>
+  );
+}
