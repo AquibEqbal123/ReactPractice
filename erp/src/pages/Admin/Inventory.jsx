@@ -42,11 +42,23 @@ export default function Inventory() {
     return true;
   });
 
+  /* ================= HELPERS ================= */
+  const getStatusFromStock = (stock, currentStatus) => {
+    if (currentStatus === "Discontinued") return "Discontinued";
+    if (stock <= 0) return "Out of Stock";
+    return "Available";
+  };
+
+
+
+
   const emptyForm = {
     name: "",
     category: "",
     stock: "",
     price: "",
+    status: "Available", // ✅ default
+
   };
 
   const [formData, setFormData] = useState(emptyForm);
@@ -69,7 +81,7 @@ export default function Inventory() {
   /* ================= PAGINATION ================= */
 
   const [page, setPage] = useState(1);
-  const itemsPerPage = 2;
+  const itemsPerPage = 5;
 
   /* ================= TABLE FILTER ================= */
 
@@ -109,15 +121,9 @@ export default function Inventory() {
 
   const statusData = [
     {
-      name: "In Stock",
+      name: "Available",
       value: graphFilteredItems.filter(
-        (i) => i.status === "In Stock"
-      ).length,
-    },
-    {
-      name: "Low Stock",
-      value: graphFilteredItems.filter(
-        (i) => i.status === "Low Stock"
+        (i) => i.status === "Available"
       ).length,
     },
     {
@@ -126,7 +132,14 @@ export default function Inventory() {
         (i) => i.status === "Out of Stock"
       ).length,
     },
+    {
+      name: "Discontinued",
+      value: graphFilteredItems.filter(
+        (i) => i.status === "Discontinued"
+      ).length,
+    },
   ];
+
 
   const COLORS = ["#22c55e", "#facc15", "#ef4444"];
 
@@ -147,9 +160,16 @@ export default function Inventory() {
   const openEdit = (item) => {
     setMode("edit");
     setCurrent(item);
-    setFormData(item);
+    setFormData({
+      name: item.name,
+      category: item.category,
+      stock: item.stock,
+      price: item.price,
+      status: item.status, // ✅ MUST
+    });
     setShowModal(true);
   };
+
 
   const openDelete = (item) => {
     setMode("delete");
@@ -170,28 +190,36 @@ export default function Inventory() {
   const handleSave = async (e) => {
     e.preventDefault();
 
+    const finalStatus =
+      formData.status === "Discontinued"
+        ? "Discontinued"
+        : formData.status === "Out of Stock"
+          ? "Out of Stock"
+          : Number(formData.stock) <= 0
+            ? "Out of Stock"
+            : "Available";
+
+    const updatedData = {
+      ...formData,
+      stock: Number(formData.stock),
+      price: Number(formData.price),
+      status: finalStatus,
+    };
+
     try {
       if (mode === "add") {
-        const res = await axiosInstance.post("/inventory", {
-          ...formData,
-          stock: Number(formData.stock),
-          price: Number(formData.price),
-        });
-        setItems([res.data, ...items]);
+        const res = await axiosInstance.post("/inventory", updatedData);
+        setItems((prev) => [res.data, ...prev]);
       }
 
       if (mode === "edit") {
         const res = await axiosInstance.put(
           `/inventory/${current._id}`,
-          {
-            ...formData,
-            stock: Number(formData.stock),
-            price: Number(formData.price),
-          }
+          updatedData
         );
 
-        setItems(
-          items.map((i) =>
+        setItems((prev) =>
+          prev.map((i) =>
             i._id === current._id ? res.data : i
           )
         );
@@ -202,6 +230,10 @@ export default function Inventory() {
 
     setShowModal(false);
   };
+
+
+
+
 
   return (
     <div className="p-6 space-y-8">
@@ -228,15 +260,20 @@ export default function Inventory() {
         </select>
 
         <select
-          value={graphStatus}
-          onChange={(e) => setGraphStatus(e.target.value)}
-          className="border px-3 py-2 rounded"
+          className="w-full border px-3 py-2 rounded"
+          value={formData.status}
+          onChange={(e) =>
+            setFormData({ ...formData, status: e.target.value })
+          }
         >
-          <option value="All">All Status</option>
-          <option value="In Stock">In Stock</option>
-          <option value="Low Stock">Low Stock</option>
+          <option value="Available">Available</option>
           <option value="Out of Stock">Out of Stock</option>
+          <option value="Discontinued">Discontinued</option>
         </select>
+
+
+
+
       </div>
 
       {/* GRAPHS */}
@@ -323,17 +360,17 @@ export default function Inventory() {
                 <td className="px-4 py-3">₹{item.price}</td>
                 <td className="px-4 py-3">
                   <span
-                    className={`px-2 py-1 rounded text-xs ${
-                      item.status === "In Stock"
-                        ? "bg-green-100 text-green-600"
-                        : item.status === "Low Stock"
-                        ? "bg-yellow-100 text-yellow-600"
-                        : "bg-red-100 text-red-600"
-                    }`}
+                    className={`px-2 py-1 rounded text-xs font-medium ${item.status === "Available"
+                      ? "bg-green-100 text-green-700"
+                      : item.status === "Out of Stock"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-gray-200 text-gray-700"
+                      }`}
                   >
                     {item.status}
                   </span>
                 </td>
+
                 <td className="px-4 py-3 flex justify-center gap-2">
                   <button onClick={() => openView(item)} className="bg-blue-500 text-white p-2 rounded">
                     <FaEye />
@@ -377,7 +414,7 @@ export default function Inventory() {
       {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white w-full max-w-md rounded-xl p-6 relative">
+          <div className="bg-white w-160 rounded-xl p-6 relative">
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-4 right-4"
@@ -418,49 +455,116 @@ export default function Inventory() {
                 <p><b>Status:</b> {current.status}</p>
               </div>
             ) : (
-              <form onSubmit={handleSave} className="space-y-3">
-                <input
-                  placeholder="Item Name"
-                  className="w-full border px-3 py-2 rounded"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                />
-                <input
-                  placeholder="Category"
-                  className="w-full border px-3 py-2 rounded"
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  required
-                />
-                <input
-                  type="number"
-                  placeholder="Stock"
-                  className="w-full border px-3 py-2 rounded"
-                  value={formData.stock}
-                  onChange={(e) =>
-                    setFormData({ ...formData, stock: e.target.value })
-                  }
-                  required
-                />
-                <input
-                  type="number"
-                  placeholder="Price"
-                  className="w-full border px-3 py-2 rounded"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
-                  }
-                  required
-                />
-                <button className="w-full bg-pink-600 text-white py-2 rounded-lg">
+              <form onSubmit={handleSave} className="space-y-4 ">
+
+                {/* ITEM NAME */}
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium mb-1">
+                    Item Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter item name"
+                    className="w-full border px-3 py-2 rounded"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                {/* CATEGORY */}
+                <div>
+                  <label htmlFor="category" className="block text-sm font-medium mb-1">
+                    Category
+                  </label>
+                  <input
+                    type="text"
+                    id="category"
+                    name="category"
+                    placeholder="Enter category"
+                    className="w-full border px-3 py-2 rounded"
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                {/* STOCK */}
+                <div>
+                  <label htmlFor="stock" className="block text-sm font-medium mb-1">
+                    Stock Quantity
+                  </label>
+                  <input
+                    type="number"
+                    id="stock"
+                    name="stock"
+                    placeholder="Enter stock quantity"
+                    className="w-full border px-3 py-2 rounded"
+                    value={formData.stock}
+                    onChange={(e) => {
+                      const stock = Number(e.target.value);
+                      setFormData({ ...formData, stock });
+                    }}
+                    required
+                  />
+                </div>
+
+                {/* PRICE */}
+                <div>
+                  <label htmlFor="price" className="block text-sm font-medium mb-1">
+                    Price
+                  </label>
+                  <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    placeholder="Enter price"
+                    className="w-full border px-3 py-2 rounded"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                {/* STATUS */}
+                <div>
+                  <label htmlFor="status" className="block text-sm font-medium mb-1">
+                    Status
+                  </label>
+                  <select
+                    id="status"
+                    name="status"
+                    className="w-full border px-3 py-2 rounded"
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                    required
+                  >
+                    <option value="Available">Available</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                    <option value="Discontinued">Discontinued</option>
+                  </select>
+                </div>
+
+                {/* SUBMIT BUTTON */}
+                <button
+                  type="submit"
+                  className="w-full bg-pink-600 text-white py-2 rounded-lg"
+                >
                   Save
                 </button>
+
               </form>
+
             )}
           </div>
         </div>

@@ -17,14 +17,21 @@ export default function StatsCards() {
     fetchStats();
   }, []);
 
-  if (!stats) return null;
+  if (!stats) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card title="Total Employees" value="—" />
+        <Card title="Revenue" value="—" />
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <Card title="Total Employees" value={stats.totalSales} />
-      <Card title="Orders" value={stats.totalOrders} />
-      <Card title="Revenue" value={`₹${stats.totalRevenue}`} />
-      <Card title="Customers" value={stats.totalCustomers} />
+      {/* ✅ REAL DATA FROM BACKEND */}
+      <Card title="Total Employees" value={stats.totalEmployees} />
+      <Card title="Total Stock" value={stats.totalStock} /> {/* ✅ ADDED */}
+      <Card title="Total Revenue" value={`₹${stats.totalRevenue}`} />
     </div>
   );
 }

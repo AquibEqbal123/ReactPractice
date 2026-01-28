@@ -36,7 +36,7 @@ export default function DashboardLayout() {
           <NavItem to="/inventory" icon={<FaBoxes />} text="Inventory" />
           <NavItem to="/sales" icon={<FaShoppingCart />} text="Sales" />
           <NavItem
-            to="/admin/leaves"
+            to="/leaves"
             icon={<FaCalendarCheck />}
             text="Leave Requests"
           />

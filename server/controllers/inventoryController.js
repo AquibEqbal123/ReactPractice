@@ -1,67 +1,111 @@
 import Inventory from "../models/Inventory.js";
 
-/* ========== GET ALL ITEMS ========== */
-export const getItems = async (req, res) => {
-  const items = await Inventory.find().sort({ createdAt: -1 });
-  res.status(200).json(items);
+/* =====================================================
+   HELPER: FINAL STATUS LOGIC (SINGLE SOURCE OF TRUTH)
+   ===================================================== */
+const getFinalStatus = (stock, status) => {
+  const numericStock = Number(stock);
+
+  // 1️⃣ Highest priority: Discontinued (manual lock)
+  if (status === "Discontinued") return "Discontinued";
+
+  // 2️⃣ Manual Out of Stock should NEVER be overwritten
+  if (status === "Out of Stock") return "Out of Stock";
+
+  // 3️⃣ Auto rule: stock <= 0 → Out of Stock
+  if (numericStock <= 0) return "Out of Stock";
+
+  // 4️⃣ Default
+  return "Available";
 };
 
-/* ========== CREATE ITEM ========== */
+/* =====================================================
+   GET ALL ITEMS
+   ===================================================== */
+export const getItems = async (req, res) => {
+  try {
+    const items = await Inventory.find().sort({ createdAt: -1 });
+    res.status(200).json(items);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/* =====================================================
+   CREATE ITEM
+   ===================================================== */
 export const createItem = async (req, res) => {
   try {
-    const { stock } = req.body;
+    const { name, category, stock, price, status } = req.body;
 
-    let status = "In Stock";
-    if (stock === 0) status = "Out of Stock";
-    else if (stock <= 5) status = "Low Stock";
+    // ✅ Validation
+    if (
+      !name ||
+      !category ||
+      stock === undefined ||
+      price === undefined
+    ) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+
+    const finalStatus = getFinalStatus(stock, status);
 
     const item = await Inventory.create({
-      ...req.body,
-      status // ✅ yahin se DB me save hoga
+      name,
+      category,
+      stock: Number(stock),
+      price: Number(price),
+      status: finalStatus,
     });
 
     res.status(201).json(item);
   } catch (error) {
+    console.error("CREATE ITEM ERROR:", error.message);
     res.status(400).json({ message: error.message });
   }
 };
 
-
-/* ========== UPDATE ITEM ========== */
+/* =====================================================
+   UPDATE ITEM
+   ===================================================== */
 export const updateItem = async (req, res) => {
   try {
-    const { stock } = req.body;
+    const { stock, status } = req.body;
 
-    let status;
-    if (stock !== undefined) {
-      if (stock === 0) status = "Out of Stock";
-      else if (stock <= 5) status = "Low Stock";
-      else status = "In Stock";
-    }
+    const finalStatus = getFinalStatus(stock, status);
 
     const updatedItem = await Inventory.findByIdAndUpdate(
       req.params.id,
       {
         ...req.body,
-        ...(status && { status }) // ✅ status auto update
+        stock: Number(stock),
+        status: finalStatus,
       },
       { new: true }
     );
 
     res.json(updatedItem);
   } catch (error) {
+    console.error("UPDATE ITEM ERROR:", error.message);
     res.status(400).json({ message: error.message });
   }
 };
 
-
-/* ========== DELETE ITEM ========== */
+/* =====================================================
+   DELETE ITEM
+   ===================================================== */
 export const deleteItem = async (req, res) => {
-  const item = await Inventory.findByIdAndDelete(req.params.id);
+  try {
+    const item = await Inventory.findByIdAndDelete(req.params.id);
 
-  if (!item) {
-    return res.status(404).json({ message: "Item not found" });
+    if (!item) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    res.status(200).json({ message: "Item deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  res.status(200).json({ message: "Item deleted" });
 };

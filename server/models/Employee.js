@@ -1,51 +1,114 @@
+// import mongoose from "mongoose";
+
+// const employeeSchema = new mongoose.Schema(
+//   {
+//     name: { type: String, required: true },
+//     email: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//       lowercase: true,
+//       trim: true
+//     },
+
+
+//     phone: String,
+//     role: String,
+//     // department: String,
+//     department: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "Department",
+//       required: true
+//     },
+//     designation: String,
+//     status: { type: String, enum: ["Active", "Inactive"], default: "Select Status" },
+//     joiningDate: String,
+
+//     password: {
+//       type: String,
+//       required: true,
+//     },
+
+
+//     // Personal Details
+//     fatherName: String,
+//     motherName: String,
+//     bloodGroup: String,
+//     gender: String,
+//     dob: String,
+//     maritalStatus: String,
+//     alternatePhone: String,
+//     alternateEmail: String,
+//     nationality: String,
+//     pincode: String,
+//     address: String,
+//     state: String,
+//     city: String,
+//     photo: { type: String, default: "" }
+
+//   },
+//   { timestamps: true }
+// );
+
+// export default mongoose.model("Employee", employeeSchema);
 import mongoose from "mongoose";
 
 const employeeSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
+
     email: {
       type: String,
       required: true,
-      unique: true,
       lowercase: true,
-      trim: true
+      trim: true,
     },
-
 
     phone: String,
-    role: String,
-    // department: String,
-    department: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Department",
-      required: true
-    },
-    designation: String,
-    status: { type: String, enum: ["Active", "Inactive"], default: "Select Status" },
-    joiningDate: String,
 
-    password: {
-      type: String,
+    role: String,
+
+    // 🔗 Link to auth user
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
 
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+      required: true,
+    },
 
-    // Personal Details
+    designation: String,
+
+    status: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default: "Active",
+    },
+
+    joiningDate: String,
+
+    // ===== Personal Details =====
     fatherName: String,
     motherName: String,
     bloodGroup: String,
     gender: String,
     dob: String,
     maritalStatus: String,
+
     alternatePhone: String,
     alternateEmail: String,
     nationality: String,
+
     pincode: String,
     address: String,
     state: String,
     city: String,
-    photo: { type: String, default: "" }
 
+    photo: { type: String, default: "" },
   },
   { timestamps: true }
 );

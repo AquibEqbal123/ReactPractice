@@ -6,14 +6,49 @@ import {
   updateLeaveStatus,
 } from "../controllers/leaveController.js";
 
+import authMiddleware from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
+
 const router = express.Router();
 
-// ✅ EMPLOYEE
-router.post("/", applyLeave);
-router.get("/employee/:employeeId", getEmployeeLeaves);
+/**
+ * EMPLOYEE ROUTES
+ */
 
-// ✅ ADMIN
-router.get("/", getAllLeaves);
-router.patch("/:id", updateLeaveStatus);
+// Apply leave (employee only)
+router.post(
+  "/",
+  authMiddleware,
+  roleMiddleware("employee"),
+  applyLeave
+);
+
+// Get own leaves (employee only)
+router.get(
+  "/my",
+  authMiddleware,
+  roleMiddleware("employee"),
+  getEmployeeLeaves
+);
+
+/**
+ * ADMIN ROUTES
+ */
+
+// Get all leaves
+router.get(
+  "/",
+  authMiddleware,
+  roleMiddleware("admin"),
+  getAllLeaves
+);
+
+// Approve / reject leave
+router.patch(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("admin"),
+  updateLeaveStatus
+);
 
 export default router;

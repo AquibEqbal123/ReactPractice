@@ -2,6 +2,7 @@ import Employee from "../models/Employee.js";
 import bcrypt from "bcryptjs";
 
 import Department from "../models/Department.js";
+import User from "../models/User.js";
 
 /* ================= GET ALL ================= */
 export const getEmployees = async (req, res) => {
@@ -18,27 +19,70 @@ export const getEmployees = async (req, res) => {
 
 
 /* ================= CREATE ================= */
+// export const createEmployee = async (req, res) => {
+//   try {
+//     const emailNormalized = req.body.email.trim().toLowerCase();
+//     const passwordNormalized = req.body.password.trim(); // 🔥 THIS WAS MISSING
+
+//     const hashedPassword = await bcrypt.hash(passwordNormalized, 10);
+
+//     const employee = await Employee.create({
+//       ...req.body,
+//       email: emailNormalized,
+//       password: hashedPassword,
+//     });
+
+
+
+//     res.status(201).json(employee);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 export const createEmployee = async (req, res) => {
   try {
-    const emailNormalized = req.body.email.trim().toLowerCase();
-    const passwordNormalized = req.body.password.trim(); // 🔥 THIS WAS MISSING
+    const {
+      email,
+      password,
+      role,
+      status,
+      ...rest
+    } = req.body;
 
-    const hashedPassword = await bcrypt.hash(passwordNormalized, 10);
+    const emailNormalized = email.trim().toLowerCase();
 
-    const employee = await Employee.create({
-      ...req.body,
+    // 🔒 Check if login user already exists
+    const userExists = await User.findOne({ email: emailNormalized });
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // 🔐 Hash password
+    const hashedPassword = await bcrypt.hash(password.trim(), 10);
+
+    // 👤 CREATE LOGIN USER (FOR AUTH)
+    const user = await User.create({
       email: emailNormalized,
       password: hashedPassword,
+      role: "employee",
     });
 
-
+    // 🧾 CREATE EMPLOYEE PROFILE
+    const employee = await Employee.create({
+      ...rest,
+      email: emailNormalized,
+      role,
+      status,
+      user: user._id, // 🔗 link auth user
+    });
 
     res.status(201).json(employee);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Create employee error:", err);
+    res.status(500).json({ message: "Create employee failed" });
   }
 };
-
 
 
 /* ================= UPDATE ================= */

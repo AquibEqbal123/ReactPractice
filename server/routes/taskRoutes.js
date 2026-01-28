@@ -8,16 +8,65 @@ import {
   completeTask,
 } from "../controllers/taskController.js";
 
+import authMiddleware from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
+
 const router = express.Router();
 
-/* ADMIN */
-router.get("/admin", getAdminTasks);
-router.post("/", createTask);
-router.delete("/:id", deleteTask);
+/**
+ * ADMIN TASK ROUTES
+ */
 
-/* EMPLOYEE */
-router.get("/employee/:employeeId", getEmployeeTasks);
-router.put("/:id/accept", acceptTask);
-router.put("/:id/complete", completeTask);
+// Get all tasks
+router.get(
+  "/admin",
+  authMiddleware,
+  roleMiddleware("admin"),
+  getAdminTasks
+);
+
+// Create task
+router.post(
+  "/",
+  authMiddleware,
+  roleMiddleware("admin"),
+  createTask
+);
+
+// Delete task
+router.delete(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("admin"),
+  deleteTask
+);
+
+/**
+ * EMPLOYEE TASK ROUTES
+ */
+
+// Get own tasks
+router.get(
+  "/my",
+  authMiddleware,
+  roleMiddleware("employee"),
+  getEmployeeTasks
+);
+
+// Accept assigned task
+router.put(
+  "/:id/accept",
+  authMiddleware,
+  roleMiddleware("employee"),
+  acceptTask
+);
+
+// Complete assigned task
+router.put(
+  "/:id/complete",
+  authMiddleware,
+  roleMiddleware("employee"),
+  completeTask
+);
 
 export default router;

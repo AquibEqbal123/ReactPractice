@@ -1,5 +1,4 @@
 import express from "express";
-import protect from "../middleware/authMiddleware.js";
 import {
   getEmployees,
   createEmployee,
@@ -7,11 +6,42 @@ import {
   deleteEmployee,
 } from "../controllers/employeeController.js";
 
+import authMiddleware from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
+
 const router = express.Router();
 
-router.get("/", protect, getEmployees);
-router.post("/", protect, createEmployee);
-router.put("/:id", protect, updateEmployee);
-router.delete("/:id", protect, deleteEmployee);
+/**
+ * EMPLOYEE MANAGEMENT
+ * ADMIN ONLY
+ */
+
+router.get(
+  "/",
+  authMiddleware,
+  roleMiddleware("admin"),
+  getEmployees
+);
+
+router.post(
+  "/",
+  authMiddleware,
+  roleMiddleware("admin"),
+  createEmployee
+);
+
+router.put(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("admin"),
+  updateEmployee
+);
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("admin"),
+  deleteEmployee
+);
 
 export default router;

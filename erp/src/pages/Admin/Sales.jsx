@@ -72,7 +72,7 @@ export default function Sales() {
   /* ---------------- PAGINATION ---------------- */
 
   const [page, setPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
 
   /* ---------------- GRAPH FILTER ---------------- */
 

@@ -685,25 +685,25 @@ export default function Employees() {
 
                 </div>
 
-                                  <div className="">
-                                  <h4 className="text-xs font-medium mb-1">Password</h4>
-                                  <input
-                                    type="password"
-                                    className="w-full border px-3 py-2 rounded"
-                                    placeholder="Password"
-                                    value={formData.password}
-                                    onChange={(e) =>
-                                      setFormData({ ...formData, password: e.target.value })
-                                    }
-                                  />
-                
-                                  {errors.password && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                      {errors.password}
-                                    </p>
-                                  )}
-                
-                                </div>
+                <div className="">
+                  <h4 className="text-xs font-medium mb-1">Password</h4>
+                  <input
+                    type="password"
+                    className="w-full border px-3 py-2 rounded"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                  />
+
+                  {errors.password && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.password}
+                    </p>
+                  )}
+
+                </div>
                 {/* ===== JOB DETAILS ===== */}
                 <h4 className="font-semibold text-sm mt-5 mb-2">Job Details</h4>
 

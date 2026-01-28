@@ -7,20 +7,54 @@ import {
   getDepartmentEmployees
 } from "../controllers/departmentController.js";
 
+import authMiddleware from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", getDepartments);
-router.post("/", createDepartment);
+/**
+ * DEPARTMENT MANAGEMENT
+ * ADMIN ONLY
+ */
 
-// 🔥 DELETE ROUTE (THIS FIXES 404)
-router.delete("/:id", deleteDepartment);
+// Get all departments
+router.get(
+  "/",
+  authMiddleware,
+  roleMiddleware("admin"),
+  getDepartments
+);
 
-// employees popup
-// router.get("/:id/employees", getEmployees);
+// Create department
+router.post(
+  "/",
+  authMiddleware,
+  roleMiddleware("admin"),
+  createDepartment
+);
 
-router.put("/:id", updateDepartment); 
-router.get("/:id/employees", getDepartmentEmployees);
+// Update department
+router.put(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("admin"),
+  updateDepartment
+);
 
+// Delete department
+router.delete(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("admin"),
+  deleteDepartment
+);
+
+// Get employees of a department (popup)
+router.get(
+  "/:id/employees",
+  authMiddleware,
+  roleMiddleware("admin"),
+  getDepartmentEmployees
+);
 
 export default router;
