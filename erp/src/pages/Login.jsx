@@ -29,7 +29,11 @@ export default function Login() {
         password,
       });
 
-      localStorage.setItem("token", res.data.token);
+      localStorage.clear(); // 🔥 very important
+      localStorage.setItem("admin_token", res.data.token);
+      localStorage.setItem("role", "admin");
+      
+
 
       if (res.data.role === "admin") {
         navigate("/dashboard");
@@ -38,9 +42,9 @@ export default function Login() {
       }
     } catch (err) {
       if (err.response?.status === 401) {
-        setError("❌ Email ya Password galat hai");
+        setError("❌ Email or password is incorrect");
       } else {
-        setError("❌ Server error, baad me try karo");
+        setError("❌ Server error, try later");
       }
     }
   };
@@ -106,16 +110,6 @@ export default function Login() {
               Login
             </button>
           </form>
-
-          {/* <p className="mt-6 text-sm text-gray-600">
-            Don’t have an account?{" "}
-            <Link
-              to="/signup"
-              className="text-[#9b6b6f] font-semibold hover:underline"
-            >
-              Signup
-            </Link>
-          </p> */}
 
           {/* Social Login */}
           <div className="flex justify-center gap-4 mt-8">

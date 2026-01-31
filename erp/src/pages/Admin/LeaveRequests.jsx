@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
 
 // ✅ NEW: axios import (backend connect ke liye)
-import axios from "axios";
+// import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
+
 
 export default function LeaveRequests() {
 
@@ -27,9 +29,8 @@ export default function LeaveRequests() {
   // ✅ NEW FUNCTION: Admin ke liye saare leave requests lana
   const fetchAllLeaves = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/leaves"
-      );
+      const res = await axiosInstance.get("/leaves");
+
       setRequests(res.data);
     } catch (error) {
       console.error("Fetch leaves error", error);
@@ -55,10 +56,11 @@ export default function LeaveRequests() {
       };
 
       // ✅ CORRECT ROUTE (NO /approve)
-      await axios.patch(
-        `http://localhost:5000/api/leaves/${selected._id}`,
+      await axiosInstance.patch(
+        `/leaves/${selected._id}`,
         payload
       );
+
 
       // 🔁 Refresh data
       fetchAllLeaves();
@@ -181,8 +183,8 @@ export default function LeaveRequests() {
               </p>
               <span
                 className={`inline-block mt-2 px-3 py-1 rounded text-xs ${req.status === "Approved"
-                    ? "bg-green-100 text-green-600"
-                    : "bg-red-100 text-red-600"
+                  ? "bg-green-100 text-green-600"
+                  : "bg-red-100 text-red-600"
                   }`}
               >
                 {req.status}
@@ -238,8 +240,8 @@ export default function LeaveRequests() {
               <button
                 onClick={confirmAction}
                 className={`px-4 py-2 text-white rounded ${actionType === "approve"
-                    ? "bg-green-600"
-                    : "bg-red-600"
+                  ? "bg-green-600"
+                  : "bg-red-600"
                   }`}
               >
                 Yes

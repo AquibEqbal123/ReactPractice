@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { useOutletContext } from "react-router-dom"; // ✅ ADD
+import axiosInstance from "../../utils/axiosInstance";
+import { useEffect } from "react";
+
 
 
 import {
@@ -17,43 +19,57 @@ import {
   IdCard,
 } from "lucide-react";
 
-// export default function Profile() {
-//   const [edit, setEdit] = useState(false);
-
-//   const [data, setData] = useState({
-//     name: "Rahul Sharma",
-//     father: "Suresh Sharma",
-//     dob: "15 August 1994",
-//     gender: "Male",
-//     marital: "Married",
-//     phone: "+91 9876543210",
-//     email: "rahul.sharma@example.com",
-
-//     employeeId: "EMP12345",
-//     position: "Software Engineer",
-//     joiningDate: "12 Mar 2020",
-//     company: "ABC Technologies Pvt Ltd",
-//   });
-
-//   const documents = [
-//     { title: "ID Proof", file: "Aadhar_Card.pdf", size: "1.2 MB" },
-//     { title: "Address Proof", file: "N/A" },
-//     { title: "Resume", file: "N/A" },
-//     { title: "Offer Letter", file: "N/A" },
-//   ];
-
 export default function Profile() {
-  const { employee } = useOutletContext();   // ✅ ADD (FIRST LINE)
-
+  const [employee, setEmployee] = useState(null);
+  const [data, setData] = useState({});
   const [edit, setEdit] = useState(false);
 
-  // ✅ INITIALIZE DATA FROM LOGGED-IN EMPLOYEE
-  const [data, setData] = useState(employee);
+  const [showPersonal, setShowPersonal] = useState(false);
+  const [showEmployment, setShowEmployment] = useState(false);
+
+
+  const documents = [];
+
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axiosInstance.get("/profile/me");
+
+        // backend se { employee, profile } aa raha hai
+        setEmployee(res.data.employee);
+        setData({
+          ...res.data.employee,
+          ...res.data.profile,
+        });
+      } catch (err) {
+        console.error("Profile fetch error", err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+
+
+  // SAMPLE DOCUMENTS
+  const handleSave = async () => {
+    try {
+      await axiosInstance.post("/profile/me", data);
+      setEdit(false);
+    } catch (err) {
+      console.error("Save profile error", err);
+      alert("Profile save failed");
+    }
+  };
+
+
 
   // 🔒 SAFETY CHECK
   if (!employee) {
-    return <p className="p-6">Please login again</p>;
+    return <p className="p-6">Loading profile...</p>;
   }
+
 
   return (
     <div className="min-h-screen bg-blue-50 w-full overflow-x-hidden">
@@ -79,11 +95,12 @@ export default function Profile() {
             ) : (
               <div className="flex gap-2">
                 <button
-                  onClick={() => setEdit(false)}
+                  onClick={handleSave}
                   className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md text-sm"
                 >
                   <Save size={16} /> Save
                 </button>
+
                 <button
                   onClick={() => setEdit(false)}
                   className="flex items-center gap-2 bg-gray-400 text-white px-4 py-2 rounded-md text-sm"
@@ -105,20 +122,28 @@ export default function Profile() {
                     className="w-28 h-28 rounded-full mx-auto mb-3"
                   />
 
-                  <button className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm w-full">
+                  <button className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm w-full mb-3">
                     <Upload size={16} /> Update Photo
                   </button>
 
-                  <div className="mt-4 text-sm space-y-2 text-left">
-                    <p className="flex items-center gap-2">
-                      <Mail size={14} /> {employee.email}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Phone size={14} /> {employee.phone}
-                    </p>
+                  {/* 🔥 NEW BUTTONS */}
+                  <div className="space-y-2 mt-8">
+                    <button
+                      onClick={() => setShowPersonal(true)}
+                      className="w-full bg-white text-sm py-2 rounded-md hover:bg-gray-100"
+                    >
+                      Personal Details
+                    </button>
 
+                    <button
+                      onClick={() => setShowEmployment(true)}
+                      className="w-full bg-white text-sm py-2 rounded-md hover:bg-gray-100 mt-2"
+                    >
+                      Employment Details
+                    </button>
                   </div>
                 </div>
+
               </div>
 
               {/* RIGHT */}
@@ -128,14 +153,22 @@ export default function Profile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Field label="Full Name" value={data.name} edit={edit}
                       onChange={(v) => setData({ ...data, name: v })} />
-                    <Field label="Father's Name" value={data.father} edit={edit}
-                      onChange={(v) => setData({ ...data, father: v })} />
+                    <Field label="Email" value={data.email} edit={edit}
+                      onChange={(v) => setData({ ...data, email: v })}
+                    />
+
+                    <Field label="Phone Number" value={data.phone} edit={edit}
+                      onChange={(v) => setData({ ...data, phone: v })}
+                    />
+
+                    <Field label="Father's Name" value={data.fatherName} edit={edit}
+                      onChange={(v) => setData({ ...data, fatherName: v })} />
                     <Field label="Date of Birth" value={data.dob} edit={edit}
                       onChange={(v) => setData({ ...data, dob: v })} />
                     <Field label="Gender" value={data.gender} edit={edit}
                       onChange={(v) => setData({ ...data, gender: v })} />
-                    <Field label="Marital Status" value={data.marital} edit={edit}
-                      onChange={(v) => setData({ ...data, marital: v })} />
+                    <Field label="Marital Status" value={data.maritalStatus} edit={edit}
+                      onChange={(v) => setData({ ...data, maritalStatus: v })} />
                     <Field label="Contact Number" value={data.phone} edit={edit}
                       onChange={(v) => setData({ ...data, phone: v })} />
                   </div>
@@ -144,39 +177,85 @@ export default function Profile() {
                 {/* COMPANY DETAILS */}
                 <Section title="Employment Details">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Static label="Employee ID" value={employee._id} icon={<IdCard size={14} />} />
                     <Static label="Designation" value={employee.designation} icon={<Briefcase size={14} />} />
                     <Static label="Joining Date" value={employee.joiningDate} icon={<Calendar size={14} />} />
                     <Static label="Department" value={employee.department?.name} icon={<Building2 size={14} />} />
                   </div>
                 </Section>
+
+                {/* DOCUMENTS */}
+                {/* <div className="bg-white rounded-xl shadow p-6"> */}
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="font-semibold flex items-center gap-2">
+                      <FileText size={18} /> Employee Documents
+                    </h2>
+                    <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
+                      <Upload size={16} /> Add Document
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {documents.length === 0 ? (
+                      <p className="text-sm text-gray-500 col-span-full">
+                        No documents uploaded
+                      </p>
+                    ) : (
+                      documents.map((doc, i) => (
+                        <div key={i} className="border rounded-lg p-4 text-sm">
+                          <p className="font-medium mb-1">{doc.title}</p>
+                          <p className="text-gray-500">{doc.file}</p>
+                          {doc.size && (
+                            <p className="text-xs text-gray-400 mt-1">{doc.size}</p>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                {/* </div> */}
+
               </div>
             </div>
           </div>
 
-          {/* DOCUMENTS */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-semibold flex items-center gap-2">
-                <FileText size={18} /> Employee Documents
-              </h2>
-              <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
-                <Upload size={16} /> Add Document
-              </button>
-            </div>
+          {/* ================= PERSONAL DETAILS MODAL ================= */}
+          {showPersonal && (
+            <Modal
+              title="Personal Details"
+              onClose={() => setShowPersonal(false)}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Static label="Full Name" value={data.name} />
+                <Static label="Email" value={data.email} />
+                <Static label="Phone" value={data.phone} />
+                <Static label="Father Name" value={data.fatherName} />
+                <Static label="Mother Name" value={data.motherName} />
+                <Static label="Date of Birth" value={data.dob} />
+                <Static label="Gender" value={data.gender} />
+                <Static label="Marital Status" value={data.maritalStatus} />
+                <Static label="Address" value={data.address} />
+                <Static label="City" value={data.city} />
+                <Static label="Pincode" value={data.pincode} />
+                <Static label="State" value={data.state} />
+                <Static label="Nationality" value={data.nationality} />
+              </div>
+            </Modal>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {documents.map((doc, i) => (
-                <div key={i} className="border rounded-lg p-4 text-sm">
-                  <p className="font-medium mb-1">{doc.title}</p>
-                  <p className="text-gray-500">{doc.file}</p>
-                  {doc.size && (
-                    <p className="text-xs text-gray-400 mt-1">{doc.size}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* ================= EMPLOYMENT DETAILS MODAL ================= */}
+          {showEmployment && (
+            <Modal
+              title="Employment Details"
+              onClose={() => setShowEmployment(false)}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Static label="Designation" value={employee.designation} />
+                <Static label="Department" value={employee.department?.name} />
+                <Static label="Joining Date" value={employee.joiningDate} />
+                <Static label="Employment Type" value={employee.employmentType} />
+                <Static label="Status" value={employee.status} />
+              </div>
+            </Modal>
+          )}
         </main>
       </div>
     </div>
@@ -193,6 +272,7 @@ function Section({ title, children }) {
     </div>
   );
 }
+
 
 function Field({ label, value, edit, onChange }) {
   return (
@@ -221,3 +301,25 @@ function Static({ label, value, icon }) {
     </div>
   );
 }
+
+function Modal({ title, children, onClose }) {
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl w-full max-w-2xl p-6 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-500 hover:text-black"
+        >
+          ✕
+        </button>
+
+        <h2 className="text-lg font-semibold mb-4">
+          {title}
+        </h2>
+
+        {children}
+      </div>
+    </div>
+  );
+}
+

@@ -12,52 +12,46 @@ export default function EmployeeSidebar() {
   const menu = [
     {
       name: "Dashboard",
-      path: "/employee",
+      path: "/employee/dashboard",
       icon: <FaTachometerAlt />,
     },
     {
       name: "My Profile",
-      path: "/profile",
+      path: "/employee/profile",
       icon: <FaUser />,
     },
     {
       name: "My Tasks",
-      path: "/tasks",
+      path: "/employee/tasks",
       icon: <FaTasks />,
     },
     {
       name: "Leave Requests",
-      path: "/leave",
+      path: "/employee/leave",
       icon: <FaCalendarAlt />,
     },
   ];
 
   return (
-    <div className="fixed bg-gray-900 min-h-screen">
-      <div className="mb-3 text-center">
-        <h1 className="font-semibold text-xl text-gray-800 dark:text-white">
-          Employee Panal
-        </h1>
-      </div>
+    <div className="b">
+      <h1 className="text-black text-xl font-semibold mb-6 text-center">
+        Employee Panel
+      </h1>
 
-      {/* Menu */}
-      <div className="rounded-xl shadow p-4">
+      <div className="space-y-2">
         {menu.map((item) => (
           <Link
             key={item.path}
             to={item.path}
-            className={`flex items-center gap-3 px-4 py-3 text-sm rounded-md hover:bg-gray-800
+            className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm
               ${
                 location.pathname === item.path
-                  ? "bg-gray-800 font-medium text-white"
-                  : "text-white"
+                  ? "bg-gray-200 text-black font-semibold"
+                  : "text-black hover:bg-gray-200 hover:text-black"
               }
             `}
           >
-            {/* ICON */}
             <span className="text-lg">{item.icon}</span>
-
-            {/* TEXT */}
             <span>{item.name}</span>
           </Link>
         ))}

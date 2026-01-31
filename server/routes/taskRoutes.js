@@ -13,11 +13,9 @@ import roleMiddleware from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-/**
- * ADMIN TASK ROUTES
- */
+/* ================= ADMIN ================= */
 
-// Get all tasks
+// 🔥 ADMIN TASKS (FIX)
 router.get(
   "/admin",
   authMiddleware,
@@ -41,9 +39,7 @@ router.delete(
   deleteTask
 );
 
-/**
- * EMPLOYEE TASK ROUTES
- */
+/* ================= EMPLOYEE ================= */
 
 // Get own tasks
 router.get(
@@ -53,7 +49,7 @@ router.get(
   getEmployeeTasks
 );
 
-// Accept assigned task
+// Accept task
 router.put(
   "/:id/accept",
   authMiddleware,
@@ -61,7 +57,7 @@ router.put(
   acceptTask
 );
 
-// Complete assigned task
+// Complete task
 router.put(
   "/:id/complete",
   authMiddleware,

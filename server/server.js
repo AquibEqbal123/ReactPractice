@@ -13,6 +13,7 @@ import leaveRoutes from "./routes/leaveRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import departmentRoutes from "./routes/departmentRoutes.js";
+import announcementRoutes from "./routes/announcementRoutes.js";
 
 
 
@@ -48,6 +49,7 @@ app.use("/api/leaves", leaveRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/departments", departmentRoutes);
+app.use("/api/announcements", announcementRoutes);
 
 // ================= TEST =================
 app.get("/", (req, res) => {

@@ -9,7 +9,7 @@ export default function TasksCard() {
 
         {/* Top View All */}
         <Link
-          to="/tasks"
+          to="/employee/tasks"
           className="text-blue-600 text-sm font-medium hover:underline"
         >
           View all
@@ -57,7 +57,7 @@ export default function TasksCard() {
       {/* Bottom Button */}
       <div className="mt-6 text-center">
         <Link
-          to="/tasks"
+          to="/employee/tasks"
           className="inline-block bg-blue-100 text-blue-600 px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-200"
         >
           View All

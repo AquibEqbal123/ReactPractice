@@ -2,20 +2,50 @@ import mongoose from "mongoose";
 
 const taskSchema = new mongoose.Schema(
   {
-    title: String,
-    description: String,
+    title: {
+      type: String,
+      required: true,
+    },
+
+    description: {
+      type: String,
+      required: true,
+    },
+
     priority: {
       type: String,
       enum: ["Low", "Medium", "High"],
+      default: "Medium",
     },
-    employeeId: String,
-    employeeName: String,
-    startDate: String,
-    endDate: String,
+
+    // 🔥 Assigned Employee
+    employee: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
+      required: true,
+    },
+
+    // 🔥 Assigned Admin (VERY IMPORTANT)
+    assignedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    startDate: {
+      type: Date,
+      required: true,
+    },
+
+    endDate: {
+      type: Date,
+      required: true,
+    },
+
     status: {
       type: String,
-      enum: ["Assigned", "In Progress", "Completed"],
-      default: "Assigned",
+      enum: ["assigned", "accepted", "completed"],
+      default: "assigned",
     },
   },
   { timestamps: true }

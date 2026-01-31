@@ -22,23 +22,26 @@ export default function EmployeeLogin() {
     setError("");
 
     try {
-      const res = await axiosInstance.post("/auth/login", {
+      const res = await axiosInstance.post("/auth/employee/login", {
         email,
         password,
       });
 
-      localStorage.setItem("token", res.data.token);
+      // ✅ TOKEN SAVE
+      localStorage.clear(); // 🔥 very important
+      localStorage.setItem("employee_token", res.data.token);
+      localStorage.setItem("role", "employee");
 
-      if (res.data.role === "employee") {
-        navigate("/employee/profile");
-      } else {
-        setError("Not an employee account");
-        localStorage.removeItem("token");
-      }
+
+      // ✅ DIRECT NAVIGATE (kyunki ye employee login hi hai)
+      navigate("/employee/profile");
+
     } catch (err) {
+      console.error(err);
       setError("Invalid email or password");
     }
   };
+
 
   return (
     <div className="min-h-screen bg-[#f6f7fb] flex items-center justify-center p-6">

@@ -1,6 +1,7 @@
 import Employee from "../models/Employee.js";
 import Sale from "../models/Sale.js";
 import Inventory from "../models/Inventory.js"; // ✅ ADD
+import Department from "../models/Department.js";
 
 
 /* ================= DASHBOARD HEADER ================= */
@@ -30,6 +31,8 @@ export const getStats = async (req, res) => {
     const totalRevenue =
       revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
 
+      const totalDepartments = await Department.countDocuments();
+
     // ✅ TOTAL STOCK FROM INVENTORY (ADD ONLY)
     const stockResult = await Inventory.aggregate([
       {
@@ -46,6 +49,7 @@ export const getStats = async (req, res) => {
     res.status(200).json({
       totalEmployees,
       totalRevenue,
+      totalDepartments, 
       totalStock, // ✅ ADDED
     });
   } catch (error) {

@@ -7,19 +7,13 @@ import {
   Trash2,
 } from "lucide-react";
 
-// ✅ Backend connect ke liye
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function Leave() {
   /* ================= STATE ================= */
 
   const [leaves, setLeaves] = useState([]);
   const [showModal, setShowModal] = useState(false);
-
-  // ⚠️ DEMO VALUES
-  // Later JWT se aayega
-  const EMPLOYEE_ID = "65abc123demo";
-  const EMPLOYEE_NAME = "Aquib Eqbal";
 
   const [formData, setFormData] = useState({
     type: "Sick Leave",
@@ -28,18 +22,15 @@ export default function Leave() {
     reason: "",
   });
 
-  /* ================= FETCH LEAVES FROM BACKEND ================= */
+  /* ================= FETCH MY LEAVES ================= */
 
   useEffect(() => {
     fetchMyLeaves();
   }, []);
 
-  // ✅ Employee ke sare leave requests lao
   const fetchMyLeaves = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/leaves/employee/${EMPLOYEE_ID}`
-      );
+      const res = await axiosInstance.get("/leaves/my");
       setLeaves(res.data);
     } catch (error) {
       console.error("Fetch leaves error", error);
@@ -61,26 +52,18 @@ export default function Leave() {
     }
 
     try {
-      // ✅ Backend payload
-      const payload = {
-        employeeId: EMPLOYEE_ID,
-        employeeName: EMPLOYEE_NAME,
+      // ✅ JWT based request (NO employeeId here)
+      await axiosInstance.post("/leaves", {
         type: formData.type,
         from: formData.from,
         to: formData.to,
         reason: formData.reason,
-      };
+      });
 
-      // ✅ POST leave request
-      await axios.post(
-        "http://localhost:5000/api/leaves",
-        payload
-      );
-
-      // ✅ Fresh data reload
+      // reload list
       fetchMyLeaves();
 
-      // ✅ Reset UI
+      // reset UI
       setShowModal(false);
       setFormData({
         type: "Sick Leave",
@@ -95,17 +78,13 @@ export default function Leave() {
   };
 
   /* ================= DELETE MESSAGE (UI ONLY) ================= */
-  // ⚠️ Ye DB se delete nahi karta
-  // Sirf employee ke view se message hataata hai
-
   const handleDelete = (id) => {
     setLeaves(leaves.filter((l) => l._id !== id));
   };
 
   return (
-    <div className="p-6 space-y-6">
-
-      {/* ================= HEADER ================= */}
+    <div className="p-6 space-y-6 bg-blue-50 min-h-screen">
+      {/* HEADER */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">My Leave Requests</h1>
 
@@ -117,7 +96,7 @@ export default function Leave() {
         </button>
       </div>
 
-      {/* ================= LEAVE LIST ================= */}
+      {/* LEAVE LIST */}
       <div className="space-y-4">
         {leaves.length === 0 && (
           <p className="text-gray-500 text-sm">
@@ -138,7 +117,7 @@ export default function Leave() {
                 </p>
               </div>
 
-              {/* ================= STATUS ================= */}
+              {/* STATUS */}
               <div>
                 {l.status === "Pending" && (
                   <span className="flex items-center gap-1 text-yellow-600 text-xs">
@@ -158,7 +137,7 @@ export default function Leave() {
               </div>
             </div>
 
-            {/* ================= ADMIN MESSAGE ================= */}
+            {/* ADMIN MESSAGE */}
             {l.message && (
               <div
                 className={`mt-3 text-sm rounded-lg p-3 ${
@@ -171,7 +150,7 @@ export default function Leave() {
               </div>
             )}
 
-            {/* ================= DELETE MESSAGE BUTTON ================= */}
+            {/* DELETE MESSAGE */}
             {(l.status === "Approved" || l.status === "Rejected") && (
               <div className="mt-3 text-right">
                 <button
@@ -186,7 +165,7 @@ export default function Leave() {
         ))}
       </div>
 
-      {/* ================= APPLY LEAVE MODAL ================= */}
+      {/* APPLY LEAVE MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md">

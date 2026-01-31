@@ -1,22 +1,61 @@
+// import { jwtDecode } from "jwt-decode";
+
+// export const getUser = () => {
+//   const token = localStorage.getItem("token");
+//   if (!token) return null;
+
+//   try {
+//     return jwtDecode(token);
+//   } catch (err) {
+//     console.error("Invalid token", err);
+//     return null;
+//   }
+// };
+
+// export const isLoggedIn = () => {
+//   return !!localStorage.getItem("token");
+// };
+
+// export const logout = () => {
+//   localStorage.removeItem("token");
+//   window.location.href = "/";
+// };
 import { jwtDecode } from "jwt-decode";
 
+// 🔑 Get logged-in user (admin / employee)
 export const getUser = () => {
-  const token = localStorage.getItem("token");
+  let token = null;
+
+  const path = window.location.pathname;
+
+  // ✅ Decide token by route
+  if (path.startsWith("/employee")) {
+    token = localStorage.getItem("employee_token");
+  } else {
+    token = localStorage.getItem("admin_token");
+  }
+
   if (!token) return null;
 
   try {
-    return jwtDecode(token);
+    return jwtDecode(token); // { id, role, exp }
   } catch (err) {
     console.error("Invalid token", err);
     return null;
   }
 };
 
+// ✅ Login check
 export const isLoggedIn = () => {
-  return !!localStorage.getItem("token");
+  return (
+    !!localStorage.getItem("admin_token") ||
+    !!localStorage.getItem("employee_token")
+  );
 };
 
+// 🚪 Logout (both roles safe)
 export const logout = () => {
-  localStorage.removeItem("token");
+  localStorage.removeItem("admin_token");
+  localStorage.removeItem("employee_token");
   window.location.href = "/";
 };

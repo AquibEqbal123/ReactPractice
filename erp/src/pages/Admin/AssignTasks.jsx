@@ -1,33 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axiosInstance from "../../utils/axiosInstance";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
 export default function AssignTask() {
   /* ================= STATE ================= */
-
   const [tasks, setTasks] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [employees, setEmployees] = useState([]);
-
   const [departments, setDepartments] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState("");
-
-  const fetchDepartments = async () => {
-    try {
-      const res = await axiosInstance.get("/departments");
-      setDepartments(res.data);
-    } catch (err) {
-      console.error("Fetch departments error", err.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchTasks();
-    fetchDepartments();   // ✅ add
-  }, []);
-
-
-
+  const hasFetched = useRef(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -39,8 +21,15 @@ export default function AssignTask() {
     endDate: "",
   });
 
-  /* ================= FETCH ONCE ================= */
+  /* ================= HELPERS ================= */
+  const statusLabel = (status) => {
+    if (status === "assigned") return "Assigned";
+    if (status === "accepted") return "In Progress";
+    if (status === "completed") return "Completed";
+    return status;
+  };
 
+  /* ================= FETCH ================= */
   const fetchTasks = async () => {
     try {
       const res = await axiosInstance.get("/tasks/admin");
@@ -50,26 +39,24 @@ export default function AssignTask() {
     }
   };
 
-  const fetchEmployees = async () => {
+  const fetchDepartments = async () => {
     try {
-      const res = await axiosInstance.get("/employees");
-      setEmployees(res.data);
+      const res = await axiosInstance.get("/departments");
+      setDepartments(res.data);
     } catch (err) {
-      console.error("Fetch employees error", err.message);
+      console.error("Fetch departments error", err.message);
     }
   };
 
-  // departments for future use
+  useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
-
-
-
-
-
-
+    fetchTasks();
+    fetchDepartments();
+  }, []);
 
   /* ================= ASSIGN TASK ================= */
-
   const handleAssignTask = async (e) => {
     e.preventDefault();
 
@@ -85,11 +72,16 @@ export default function AssignTask() {
     }
 
     try {
-      const payload = { ...formData, status: "Assigned" };
-      const res = await axiosInstance.post("/tasks", payload);
+      const { employeeName, ...cleanData } = formData;
 
-      // ✅ locally add (NO refetch)
-      setTasks((prev) => [...prev, res.data]);
+      const payload = {
+        ...cleanData,
+        startDate: new Date(cleanData.startDate),
+        endDate: new Date(cleanData.endDate),
+      };
+
+      await axiosInstance.post("/tasks", payload);
+      await fetchTasks();
 
       setShowModal(false);
       setFormData({
@@ -106,19 +98,13 @@ export default function AssignTask() {
     }
   };
 
-  /* ================= DELETE TASK (HISTORY MODE) ================= */
-
+  /* ================= DELETE TASK ================= */
   const deleteTask = async (id) => {
     if (!window.confirm("Delete this task?")) return;
 
     try {
-      // ✅ backend call only
       await axiosInstance.delete(`/tasks/${id}`);
-
-      // ❌ UI se remove NAHI kar rahe
-      // history ke liye task niche hi rahega
-
-      alert("Task deleted (kept in history)");
+      await fetchTasks();
     } catch (err) {
       console.error("Delete task error", err.message);
     }
@@ -154,8 +140,9 @@ export default function AssignTask() {
               <div>
                 <h2 className="font-semibold">{task.title}</h2>
                 <p className="text-sm text-gray-600">
-                  {task.employeeName} • {task.priority}
+                  {task.employee?.name} • {task.priority}
                 </p>
+
                 <p className="text-xs text-gray-500">
                   {task.startDate} → {task.endDate}
                 </p>

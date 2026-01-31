@@ -1,12 +1,20 @@
 import LeaveRequest from "../models/LeaveRequest.js";
+import Employee from "../models/Employee.js";
 
 /* ================= APPLY LEAVE (EMPLOYEE) ================= */
 export const applyLeave = async (req, res) => {
   try {
-    const { employeeId, employeeName, type, from, to, reason } = req.body;
+    // 1️⃣ Get employee from JWT
+    const employee = await Employee.findOne({ user: req.user.id });
 
-    // ✅ VALIDATION
-    if (!employeeId || !employeeName || !type || !from || !to || !reason) {
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    const { type, from, to, reason } = req.body;
+
+    // 2️⃣ Validation
+    if (!type || !from || !to || !reason) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -14,13 +22,15 @@ export const applyLeave = async (req, res) => {
       return res.status(400).json({ message: "Invalid date range" });
     }
 
+    // 3️⃣ Create leave
     const leave = await LeaveRequest.create({
-      employeeId,
-      employeeName,
+      employeeId: employee._id,
+      employeeName: employee.name,
       type,
       from,
       to,
       reason,
+      status: "Pending",
     });
 
     res.status(201).json(leave);
@@ -30,14 +40,18 @@ export const applyLeave = async (req, res) => {
   }
 };
 
-/* ================= GET LEAVES BY EMPLOYEE ================= */
+/* ================= GET MY LEAVES (EMPLOYEE) ================= */
 export const getEmployeeLeaves = async (req, res) => {
   try {
-    const { employeeId } = req.params;
+    const employee = await Employee.findOne({ user: req.user.id });
 
-    const leaves = await LeaveRequest.find({ employeeId }).sort({
-      createdAt: -1,
-    });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    const leaves = await LeaveRequest.find({
+      employeeId: employee._id,
+    }).sort({ createdAt: -1 });
 
     res.status(200).json(leaves);
   } catch (error) {

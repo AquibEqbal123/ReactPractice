@@ -13,6 +13,7 @@ import Sales from "./pages/Admin/Sales";
 import LeaveRequests from "./pages/Admin/LeaveRequests";
 import AssignTasks from "./pages/Admin/AssignTasks";
 import Departments from "./pages/Admin/Departments";
+import Announcements from "./pages/Admin/Announcements";
 
 // Employee components
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard";
@@ -23,11 +24,14 @@ import Leave from "./pages/Employee/Leave";
 import DashboardLayout from "./layouts/DashboardLayout";
 import AdTopbar from "./components/AdTopbar";
 import EmployeeLogin from "./pages/EmployeeLogin";
+import Topbar from "./components/Topbar";
+import Sidebar from "./components/Sidebar";
+import EmployeeLayout from "./layouts/EmployeeLayout";
 
 function App() {
   return (
     <Routes>
-        ===== LOGIN CHOICE =====
+      ===== LOGIN CHOICE =====
       <Route path="/" element={<LoginChoice />} />
 
       {/* ===== PUBLIC ===== */}
@@ -53,16 +57,39 @@ function App() {
           <Route path="/leaves" element={<LeaveRequests />} />
           <Route path="/assign-tasks" element={<AssignTasks />} />
           <Route path="/departments" element={<Departments />} />
+          <Route path="/announcements" element={<Announcements />} />
         </Route>
+
       </Route>
 
       {/* ===== EMPLOYEE ROUTES ===== */}
-      <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
+      {/* <Route element={<ProtectedRoute allowedRoles={["employee"]} />}> */}
+
+      {/* <Route
+          element={
+            <>
+              <Topbar />
+              <Sidebar />
+            </>
+          }
+        >
         <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
         <Route path="/employee/profile" element={<Profile />} />
         <Route path="/employee/tasks" element={<Tasks />} />
         <Route path="/employee/leave" element={<Leave />} />
+      </Route></Route> */}
+
+      {/* ===== EMPLOYEE (🔥 IMPORTANT PART) ===== */}
+      <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
+        <Route path="/employee" element={<EmployeeLayout />}>
+          <Route path="dashboard" element={<EmployeeDashboard />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="leave" element={<Leave />} />
+        </Route>
       </Route>
+
+
 
     </Routes>
   );

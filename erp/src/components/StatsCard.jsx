@@ -21,6 +21,8 @@ export default function StatsCards() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card title="Total Employees" value="—" />
+        <Card title="Total Departments" value="—" /> {/* NEW */}
+        <Card title="Total Stock" value="—" />
         <Card title="Revenue" value="—" />
       </div>
     );
@@ -28,9 +30,9 @@ export default function StatsCards() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {/* ✅ REAL DATA FROM BACKEND */}
       <Card title="Total Employees" value={stats.totalEmployees} />
-      <Card title="Total Stock" value={stats.totalStock} /> {/* ✅ ADDED */}
+      <Card title="Total Departments" value={stats.totalDepartments} /> {/* ✅ */}
+      <Card title="Total Stock" value={stats.totalStock} />
       <Card title="Total Revenue" value={`₹${stats.totalRevenue}`} />
     </div>
   );
