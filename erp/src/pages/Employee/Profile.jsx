@@ -24,8 +24,12 @@ export default function Profile() {
   const [data, setData] = useState({});
   const [edit, setEdit] = useState(false);
 
-  const [showPersonal, setShowPersonal] = useState(false);
-  const [showEmployment, setShowEmployment] = useState(false);
+  // const [showPersonal, setShowPersonal] = useState(false);
+  // const [showEmployment, setShowEmployment] = useState(false);
+
+  const [activeSection, setActiveSection] = useState("personal");
+  // "personal" | "employment"
+
 
 
   const documents = [];
@@ -129,18 +133,25 @@ export default function Profile() {
                   {/* 🔥 NEW BUTTONS */}
                   <div className="space-y-2 mt-8">
                     <button
-                      onClick={() => setShowPersonal(true)}
-                      className="w-full bg-white text-sm py-2 rounded-md hover:bg-gray-100"
+                      onClick={() => setActiveSection("personal")}
+                      className={`w-full text-sm py-2 rounded-md 
+                      ${activeSection === "personal"
+                          ? "bg-gray-200 text-black"
+                          : "bg-white hover:bg-gray-100"}`}
                     >
                       Personal Details
                     </button>
 
                     <button
-                      onClick={() => setShowEmployment(true)}
-                      className="w-full bg-white text-sm py-2 rounded-md hover:bg-gray-100 mt-2"
+                      onClick={() => setActiveSection("employment")}
+                      className={`w-full text-sm py-2 rounded-md mt-2
+                      ${activeSection === "employment"
+                          ? "bg-gray-200 text-black"
+                          : "bg-white hover:bg-gray-100"}`}
                     >
                       Employment Details
                     </button>
+
                   </div>
                 </div>
 
@@ -149,68 +160,127 @@ export default function Profile() {
               {/* RIGHT */}
               <div className="col-span-12 md:col-span-9">
                 {/* PERSONAL DETAILS */}
-                <Section title="Personal Details">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Field label="Full Name" value={data.name} edit={edit}
-                      onChange={(v) => setData({ ...data, name: v })} />
-                    <Field label="Email" value={data.email} edit={edit}
-                      onChange={(v) => setData({ ...data, email: v })}
-                    />
+                {activeSection === "personal" && (
+                  <Section title="Personal Details">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Field label="Full Name" value={data.name} edit={edit}
+                        onChange={(v) => setData({ ...data, name: v })} />
+                      <Field label="Email" value={data.email} edit={edit}
+                        onChange={(v) => setData({ ...data, email: v })}
+                      />
 
-                    <Field label="Phone Number" value={data.phone} edit={edit}
-                      onChange={(v) => setData({ ...data, phone: v })}
-                    />
+                      <Field label="Phone Number" value={data.phone} edit={edit}
+                        onChange={(v) => setData({ ...data, phone: v })}
+                      />
 
-                    <Field label="Father's Name" value={data.fatherName} edit={edit}
-                      onChange={(v) => setData({ ...data, fatherName: v })} />
-                    <Field label="Date of Birth" value={data.dob} edit={edit}
-                      onChange={(v) => setData({ ...data, dob: v })} />
-                    <Field label="Gender" value={data.gender} edit={edit}
-                      onChange={(v) => setData({ ...data, gender: v })} />
-                    <Field label="Marital Status" value={data.maritalStatus} edit={edit}
-                      onChange={(v) => setData({ ...data, maritalStatus: v })} />
-                    <Field label="Contact Number" value={data.phone} edit={edit}
-                      onChange={(v) => setData({ ...data, phone: v })} />
-                  </div>
-                </Section>
+                      <Field label="Mother's Name" value={data.motherName} edit={edit}
+                        onChange={(v) => setData({ ...data, motherName: v })} />
+                      <Field label="Father's Name" value={data.fatherName} edit={edit}
+                        onChange={(v) => setData({ ...data, fatherName: v })} />
+                      <Field label="Date of Birth" value={data.dob} edit={edit}
+                        onChange={(v) => setData({ ...data, dob: v })} />
+                      <Field label="Gender" value={data.gender} edit={edit}
+                        onChange={(v) => setData({ ...data, gender: v })} />
+                      <Field label="Marital Status" value={data.maritalStatus} edit={edit}
+                        onChange={(v) => setData({ ...data, maritalStatus: v })} />
+                      <Field label="Contact Number" value={data.phone} edit={edit}
+                        onChange={(v) => setData({ ...data, phone: v })} />
+                      <Field label="Address" value={data.address} edit={edit}
+                        onChange={(v) => setData({ ...data, address: v })} />
+                      <Field label="City" value={data.city} edit={edit}
+                        onChange={(v) => setData({ ...data, city: v })} />
+                      <Field label="Pincode" value={data.pincode} edit={edit}
+                        onChange={(v) => setData({ ...data, pincode: v })} />
+                      <Field label="State" value={data.state} edit={edit}
+                        onChange={(v) => setData({ ...data, state: v })} />
+                      <Field label="Nationality" value={data.nationality} edit={edit}
+                        onChange={(v) => setData({ ...data, nationality: v })} />
+                    </div>
+                  </Section>
+                )}
+
+
+                {/* EMPLOYMENT DETAILS */}
+                {activeSection === "employment" && (
+                  <Section title="Employment Details">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                      <Static label="Designation" value={employee.designation} />
+                      <Static label="Department" value={employee.department?.name} />
+                      <Static label="Joining Date" value={employee.joiningDate} />
+                      <Static label="Employment Type" value={employee.employmentType} />
+                      <Static label="Status" value={employee.status} />
+                    </div>
+
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="font-semibold flex items-center gap-2">
+                        <FileText size={18} /> Employee Documents
+                      </h2>
+                      <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
+                        <Upload size={16} /> Add Document
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      {documents.length === 0 ? (
+                        <p className="text-sm text-gray-500 col-span-full">
+                          No documents uploaded
+                        </p>
+                      ) : (
+                        documents.map((doc, i) => (
+                          <div key={i} className="border rounded-lg p-4 text-sm">
+                            <p className="font-medium mb-1">{doc.title}</p>
+                            <p className="text-gray-500">{doc.file}</p>
+                            {doc.size && (
+                              <p className="text-xs text-gray-400 mt-1">{doc.size}</p>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </Section>
+
+
+
+                )}
+
 
                 {/* COMPANY DETAILS */}
-                <Section title="Employment Details">
+                {/* <Section title="Employment Details">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Static label="Designation" value={employee.designation} icon={<Briefcase size={14} />} />
                     <Static label="Joining Date" value={employee.joiningDate} icon={<Calendar size={14} />} />
                     <Static label="Department" value={employee.department?.name} icon={<Building2 size={14} />} />
                   </div>
-                </Section>
+                </Section> */}
 
                 {/* DOCUMENTS */}
                 {/* <div className="bg-white rounded-xl shadow p-6"> */}
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="font-semibold flex items-center gap-2">
-                      <FileText size={18} /> Employee Documents
-                    </h2>
-                    <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
-                      <Upload size={16} /> Add Document
-                    </button>
-                  </div>
+                {/* <div className="flex justify-between items-center mb-4">
+                  <h2 className="font-semibold flex items-center gap-2">
+                    <FileText size={18} /> Employee Documents
+                  </h2>
+                  <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
+                    <Upload size={16} /> Add Document
+                  </button>
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {documents.length === 0 ? (
-                      <p className="text-sm text-gray-500 col-span-full">
-                        No documents uploaded
-                      </p>
-                    ) : (
-                      documents.map((doc, i) => (
-                        <div key={i} className="border rounded-lg p-4 text-sm">
-                          <p className="font-medium mb-1">{doc.title}</p>
-                          <p className="text-gray-500">{doc.file}</p>
-                          {doc.size && (
-                            <p className="text-xs text-gray-400 mt-1">{doc.size}</p>
-                          )}
-                        </div>
-                      ))
-                    )}
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {documents.length === 0 ? (
+                    <p className="text-sm text-gray-500 col-span-full">
+                      No documents uploaded
+                    </p>
+                  ) : (
+                    documents.map((doc, i) => (
+                      <div key={i} className="border rounded-lg p-4 text-sm">
+                        <p className="font-medium mb-1">{doc.title}</p>
+                        <p className="text-gray-500">{doc.file}</p>
+                        {doc.size && (
+                          <p className="text-xs text-gray-400 mt-1">{doc.size}</p>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div> */}
                 {/* </div> */}
 
               </div>
@@ -218,7 +288,7 @@ export default function Profile() {
           </div>
 
           {/* ================= PERSONAL DETAILS MODAL ================= */}
-          {showPersonal && (
+          {/* {showPersonal && (
             <Modal
               title="Personal Details"
               onClose={() => setShowPersonal(false)}
@@ -239,10 +309,10 @@ export default function Profile() {
                 <Static label="Nationality" value={data.nationality} />
               </div>
             </Modal>
-          )}
+          )} */}
 
           {/* ================= EMPLOYMENT DETAILS MODAL ================= */}
-          {showEmployment && (
+          {/* {showEmployment && (
             <Modal
               title="Employment Details"
               onClose={() => setShowEmployment(false)}
@@ -255,7 +325,7 @@ export default function Profile() {
                 <Static label="Status" value={employee.status} />
               </div>
             </Modal>
-          )}
+          )} */}
         </main>
       </div>
     </div>

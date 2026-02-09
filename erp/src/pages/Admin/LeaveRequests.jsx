@@ -1,92 +1,82 @@
 import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
-
-// ✅ NEW: axios import (backend connect ke liye)
-// import axios from "axios";
 import axiosInstance from "../../utils/axiosInstance";
-
 
 export default function LeaveRequests() {
 
   /* ================= STATE ================= */
   const [requests, setRequests] = useState([]);
 
-  // popup state (same)
   const [showConfirm, setShowConfirm] = useState(false);
   const [selected, setSelected] = useState(null);
   const [actionType, setActionType] = useState("");
 
-  // pagination (same)
   const [page, setPage] = useState(1);
   const perPage = 7;
 
-  /* ================= FETCH ALL LEAVES FROM BACKEND ================= */
+  /* ================= FETCH ================= */
 
   useEffect(() => {
     fetchAllLeaves();
   }, []);
 
-  // ✅ NEW FUNCTION: Admin ke liye saare leave requests lana
   const fetchAllLeaves = async () => {
     try {
       const res = await axiosInstance.get("/leaves");
-
       setRequests(res.data);
     } catch (error) {
       console.error("Fetch leaves error", error);
     }
   };
 
-  /* ================= OPEN CONFIRM ================= */
+
+  const [statusFilter, setStatusFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+
+
+  /* ================= ACTION ================= */
+
   const openConfirm = (req, action) => {
     setSelected(req);
     setActionType(action);
     setShowConfirm(true);
   };
 
-  /* ================= CONFIRM ACTION ================= */
   const confirmAction = async () => {
     try {
-      const payload = {
+      await axiosInstance.patch(`/leaves/${selected._id}`, {
         status: actionType === "approve" ? "Approved" : "Rejected",
         message:
           actionType === "approve"
-            ? "Your leave request has been Approved by Admin."
-            : "Your leave request has been Rejected by Admin.",
-      };
+            ? "Your leave request has been Approved."
+            : "Your leave request has been Rejected.",
+      });
 
-      // ✅ CORRECT ROUTE (NO /approve)
-      await axiosInstance.patch(
-        `/leaves/${selected._id}`,
-        payload
-      );
-
-
-      // 🔁 Refresh data
       fetchAllLeaves();
-
       setShowConfirm(false);
-      setSelected(null);
-      setActionType("");
     } catch (error) {
       console.error("Action error", error);
     }
   };
 
-
   /* ================= FILTER ================= */
 
-  // Pending requests
-  const pending = requests.filter(
-    (r) => r.status === "Pending"
-  );
+  const pending = requests.filter(r => r.status === "Pending");
+  const history = requests.filter(r => {
+    if (r.status === "Pending") return false;
 
-  // Approved + Rejected history
-  const history = requests.filter(
-    (r) => r.status !== "Pending"
-  );
+    const statusOk = statusFilter ? r.status === statusFilter : true;
+    const typeOk = typeFilter ? r.type === typeFilter : true;
 
-  // pagination logic (same)
+    return statusOk && typeOk;
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter, typeFilter]);
+
+
+
   const totalPages = Math.ceil(history.length / perPage);
   const paginatedHistory = history.slice(
     (page - 1) * perPage,
@@ -96,30 +86,26 @@ export default function LeaveRequests() {
   return (
     <div className="p-6 space-y-8">
 
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
       <div>
-        <h1 className="text-2xl font-semibold">
-          Leave Requests (Admin)
-        </h1>
-        <p className="text-sm text-gray-500">
-          Manage employee leave approvals
-        </p>
+        <h1 className="text-2xl font-semibold">Leave Requests (Admin)</h1>
+        <p className="text-sm text-gray-500">Manage employee leave approvals</p>
       </div>
 
-      {/* ================= PENDING REQUESTS ================= */}
+      {/* ================= PENDING ================= */}
+
       <div className="bg-white rounded-xl shadow">
-        <h2 className="font-semibold p-4 border-b">
-          Pending Requests
-        </h2>
+        <h2 className="font-semibold p-4 border-b">Pending Requests</h2>
 
         <table className="w-full text-sm">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 text-left">Employee</th>
-              <th className="text-left">Type</th>
+              <th className="text-left">Leave Type</th>
               <th className="text-left">From</th>
               <th className="text-left">To</th>
               <th className="text-left">Status</th>
+              <th className="text-left">Reason</th>
               <th className="text-center">Action</th>
             </tr>
           </thead>
@@ -127,22 +113,21 @@ export default function LeaveRequests() {
           <tbody>
             {pending.length === 0 ? (
               <tr>
-                <td colSpan="6" className="p-4 text-center text-gray-500">
+                <td colSpan="7" className="p-4 text-center text-gray-500">
                   No pending requests
                 </td>
               </tr>
             ) : (
-              pending.map((req) => (
-                <tr key={req._id} className="border-t text-left">
-                  <td className="p-3 font-medium">
-                    {req.employeeName}
-                  </td>
+              pending.map(req => (
+                <tr key={req._id} className="border-t">
+                  <td className="p-3 font-medium">{req.employeeName}</td>
                   <td>{req.type}</td>
                   <td>{req.from.slice(0, 10)}</td>
                   <td>{req.to.slice(0, 10)}</td>
                   <td className="flex items-center gap-1">
                     <Clock size={14} /> Pending
                   </td>
+                  <td>{req.reason || "—"}</td>
                   <td className="flex justify-center gap-2 p-3">
                     <button
                       onClick={() => openConfirm(req, "approve")}
@@ -164,38 +149,97 @@ export default function LeaveRequests() {
         </table>
       </div>
 
-      {/* ================= HISTORY ================= */}
-      <div className="bg-white rounded-xl shadow p-6">
-        <h2 className="font-semibold mb-4">
-          Approved / Rejected History
-        </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {paginatedHistory.map((req) => (
-            <div
-              key={req._id}
-              className="border rounded-lg p-4 text-sm"
-            >
-              <p className="font-medium">{req.employeeName}</p>
-              <p>{req.type}</p>
-              <p className="text-gray-500">
-                {req.from.slice(0, 10)} → {req.to.slice(0, 10)}
-              </p>
-              <span
-                className={`inline-block mt-2 px-3 py-1 rounded text-xs ${req.status === "Approved"
-                  ? "bg-green-100 text-green-600"
-                  : "bg-red-100 text-red-600"
-                  }`}
-              >
-                {req.status}
-              </span>
-            </div>
-          ))}
-        </div>
+      <div className="flex justify-end gap-3 px-4">
+
+        <select
+          className="shadow-sm w-32 h-9 px-2 rounded text-sm 
+               focus:outline-none focus:ring-0 focus:border-gray-300"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All Status</option>
+          <option>Approved</option>
+          <option>Rejected</option>
+        </select>
+
+        <select
+          className="shadow-sm w-32 h-9 px-2 rounded text-sm 
+               focus:outline-none focus:ring-0 focus:border-gray-300"
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+        >
+          <option value="">All Types</option>
+          <option>Sick</option>
+          <option>Casual</option>
+          <option>Vacation</option>
+          <option>Paternity</option>
+        </select>
+
+      </div>
+
+      {/* ================= HISTORY ================= */}
+      <div className="bg-white shadow rounded-xl">
+        <h2 className="font-semibold p-4">Leave Request History</h2>
+
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left">Employee</th>
+              <th className="text-left">Leave Type</th>
+              <th className="text-left">Dates Requested</th>
+              <th className="text-left">Reason</th>
+              <th className="text-left">Submitted On</th>
+              <th className="text-left">Status</th>
+              <th className="text-center">Assigned To</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {paginatedHistory.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="p-4 text-center text-gray-500">
+                  No history found
+                </td>
+              </tr>
+            ) : (
+              paginatedHistory.map(req => (
+                <tr key={req._id} className="">
+
+                  <td className="p-3 font-medium">{req.employeeName}</td>
+
+                  <td>{req.type}</td>
+
+                  <td>
+                    {req.from.slice(0, 10)} - {req.to.slice(0, 10)}
+                  </td>
+
+                  <td>{req.reason || "—"}</td>
+
+                  <td>{req.createdAt?.slice(0, 10)}</td>
+
+                  <td>
+                    <span className={`px-3 py-1 rounded text-xs font-medium ${req.status === "Approved"
+                      ? "bg-green-100 text-green-600"
+                      : "bg-red-100 text-red-600"
+                      }`}>
+                      {req.status}
+                    </span>
+                  </td>
+
+                  <td className="font-medium text-gray-700 text-center">
+                    {req.handledBy || "Admin"}
+                  </td>
+
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
 
         {/* PAGINATION */}
         {totalPages > 1 && (
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex justify-between items-center p-4">
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
@@ -220,12 +264,11 @@ export default function LeaveRequests() {
       </div>
 
       {/* ================= CONFIRM POPUP ================= */}
+
       {showConfirm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-sm text-center">
-            <h2 className="text-lg font-semibold mb-3">
-              Are you sure?
-            </h2>
+            <h2 className="text-lg font-semibold mb-3">Are you sure?</h2>
             <p className="text-sm text-gray-600 mb-6">
               Do you want to {actionType} this request?
             </p>

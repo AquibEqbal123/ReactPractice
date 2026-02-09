@@ -1,41 +1,31 @@
-// export default function Announcements() {
-//   return (
-//     <div className="bg-white p-6 rounded-xl shadow">
-//       <h2 className="font-semibold mb-4">Announcements</h2>
-//       <ul className="text-sm space-y-2">
-//         <li>• Team Outing on Friday</li>
-//         <li>• New HR Policy Update</li>
-//         <li>• Training Session on Monday</li>
-//       </ul>
-//     </div>
-//   );
-// }
-
 import { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 
 export default function EmployeeAnnouncements() {
   const [announcements, setAnnouncements] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  /* ================= FETCH ANNOUNCEMENTS ================= */
   useEffect(() => {
     fetchAnnouncements();
   }, []);
 
   const fetchAnnouncements = async () => {
-    try {
-      const res = await axiosInstance.get("/announcements");
-      setAnnouncements(res.data);
-    } catch (error) {
-      console.error("Fetch announcements error", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+
+    const res = await axiosInstance.get("/announcements/my");
+    setAnnouncements(res.data);
+
+  } catch (error) {
+    console.error("Fetch announcements error", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
-    <div className="bg-white rounded-xl shadow p-6">
+    <div className="bg-white rounded-xl shadow p-6 w-138">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold text-lg">Announcements</h2>

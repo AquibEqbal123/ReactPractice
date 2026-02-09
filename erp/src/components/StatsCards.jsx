@@ -47,22 +47,22 @@ export default function StatsCards() {
     {
       title: "Pending Tasks",
       value: pendingTasks,
-      color: "bg-orange-500",
+      color: "bg-white",
     },
     {
       title: "Today's Attendance",
       value: "Present", // ❌ backend nahi hai → static
-      color: "bg-green-500",
+      color: "bg-white",
     },
     {
       title: "Leave Balance",
       value: leaveBalance, // ✅ backend se
-      color: "bg-blue-500",
+      color: "bg-white",
     },
     {
       title: "Upcoming Holiday",
       value: "Diwali - 4 Nov", // ❌ backend nahi hai → static
-      color: "bg-purple-500",
+      color: "bg-white",
     },
   ];
 
@@ -71,7 +71,7 @@ export default function StatsCards() {
       {cards.map((card) => (
         <div
           key={card.title}
-          className={`${card.color} text-white p-6 rounded-xl shadow`}
+          className={`${card.color} text-black p-6 rounded-xl shadow`}
         >
           <p className="text-sm">{card.title}</p>
           <h2 className="text-2xl font-bold mt-2">

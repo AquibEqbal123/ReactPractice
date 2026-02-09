@@ -8,36 +8,58 @@ export default function Announcements() {
 
   const [message, setMessage] = useState("");
 
-  /* ================= FETCH ================= */
+  const [departments, setDepartments] = useState([]);
+  const [departmentId, setDepartmentId] = useState("");
+
   useEffect(() => {
     fetchAnnouncements();
+    fetchDepartments();
   }, []);
 
-  const fetchAnnouncements = async () => {
-    try {
-      const res = await axiosInstance.get("/announcements");
-      setAnnouncements(res.data);
-    } catch (error) {
-      console.error(error);
-    }
+  const fetchDepartments = async () => {
+    const res = await axiosInstance.get("/departments");
+    setDepartments(res.data);
   };
+
+
+
+  /* ================= FETCH ================= */
+  // useEffect(() => {
+  //   fetchAnnouncements();
+  // }, []);
+
+ const fetchAnnouncements = async () => {
+  try {
+    const res = await axiosInstance.get("/announcements");
+    setAnnouncements(res.data);
+  } catch (error) {
+    console.error("Fetch announcements error", error);
+  } 
+};
+
 
   /* ================= CREATE ================= */
   const handleCreate = async () => {
-    if (!message.trim()) {
-      alert("Message is required");
+    if (!message || !departmentId) {
+      alert("All fields required");
       return;
     }
 
     try {
-      await axiosInstance.post("/announcements", { message });
+      await axiosInstance.post("/announcements", {
+        message,
+        departmentId,
+      });
+
       fetchAnnouncements();
       setShowModal(false);
       setMessage("");
+      setDepartmentId("");
     } catch (error) {
       console.error(error);
     }
   };
+
 
   /* ================= DELETE ================= */
   const handleDelete = async (id) => {
@@ -81,10 +103,17 @@ export default function Announcements() {
                 <p className="text-sm text-gray-700">
                   {a.message}
                 </p>
+
+                {/* ✅ ADD HERE */}
+                <p className="text-xs text-gray-500">
+                  Department: {a.department?.name}
+                </p>
+
                 <p className="text-xs text-gray-400 mt-1">
                   {new Date(a.createdAt).toLocaleDateString()}
                 </p>
               </div>
+
 
               <button
                 onClick={() => handleDelete(a._id)}
@@ -112,6 +141,20 @@ export default function Announcements() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
+
+            <select
+              className="w-full border px-3 py-2 rounded mb-3"
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
+            >
+              <option value="">Select Department</option>
+              {departments.map((d) => (
+                <option key={d._id} value={d._id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+
 
             <div className="flex justify-end gap-3 mt-4">
               <button

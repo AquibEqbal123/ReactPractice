@@ -3,6 +3,7 @@ import {
   createAnnouncement,
   getAllAnnouncements,
   deleteAnnouncement,
+  getEmployeeAnnouncements,
 } from "../controllers/announcementController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -10,7 +11,9 @@ import roleMiddleware from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-// Admin only
+/* ================= ADMIN ================= */
+
+// Admin → create announcement
 router.post(
   "/",
   authMiddleware,
@@ -18,6 +21,7 @@ router.post(
   createAnnouncement
 );
 
+// Admin → delete announcement
 router.delete(
   "/:id",
   authMiddleware,
@@ -25,11 +29,23 @@ router.delete(
   deleteAnnouncement
 );
 
-// Admin + Employee (future)
+// Admin → get ALL announcements
 router.get(
   "/",
   authMiddleware,
+  roleMiddleware("admin"),
   getAllAnnouncements
 );
+
+/* ================= EMPLOYEE ================= */
+
+// Employee → get department-wise announcements
+router.get(
+  "/my",
+  authMiddleware,
+  roleMiddleware("employee"),
+  getEmployeeAnnouncements
+);
+
 
 export default router;

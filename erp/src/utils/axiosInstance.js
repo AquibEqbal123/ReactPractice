@@ -16,6 +16,7 @@ axiosInstance.interceptors.request.use((config) => {
     if (config.url.startsWith("/dashboard") ||
         config.url.startsWith("/employees") ||
         config.url.startsWith("/departments") ||
+        config.url.startsWith("/announcements") ||   // ✅ ADD THIS
         config.url.startsWith("/leaves") && config.method === "get") {
       tokenToSend = adminToken;
     } 

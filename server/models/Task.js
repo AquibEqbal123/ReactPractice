@@ -42,6 +42,22 @@ const taskSchema = new mongoose.Schema(
       required: true,
     },
 
+    CodeReviewMeeting: {
+      type: Date,
+      required: true,
+    },
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+      required: true,
+    },
+
+    ClientPresentationPrep: {
+      type: Date,
+      required: true,
+    },
+
+
     status: {
       type: String,
       enum: ["assigned", "accepted", "completed"],

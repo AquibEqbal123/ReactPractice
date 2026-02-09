@@ -1,13 +1,40 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axiosInstance from "../utils/axiosInstance";
 
 export default function TasksCard() {
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    fetchMyTasks();
+  }, []);
+
+  const fetchMyTasks = async () => {
+    try {
+      const res = await axiosInstance.get("/tasks/my");
+      setTasks(res.data.slice(0, 3)); // sirf 3 tasks
+    } catch (error) {
+      console.error("Fetch tasks error", error);
+    }
+  };
+
+  // 🔹 helper for due label
+  const getDueLabel = (endDate) => {
+    const today = new Date();
+    const due = new Date(endDate);
+    const diff =
+      Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+
+    if (diff <= 0) return "Due Today";
+    if (diff === 1) return "Due Tomorrow";
+    return `Due in ${diff} Days`;
+  };
+
   return (
     <div className="bg-white rounded-xl shadow p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold text-lg">My Tasks</h2>
-
-        {/* Top View All */}
         <Link
           to="/employee/tasks"
           className="text-blue-600 text-sm font-medium hover:underline"
@@ -16,43 +43,32 @@ export default function TasksCard() {
         </Link>
       </div>
 
-      {/* Tasks List */}
-      <div className="space-y-4">
-        {/* Task 1 */}
-        <div className="flex justify-between items-center border-b pb-2">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-            <p className="text-sm font-medium">Finish Project Report</p>
-          </div>
-          <span className="text-xs bg-red-500 text-white px-3 py-1 rounded">
-            Due Today
-          </span>
-        </div>
+      {/* Task List */}
+      {tasks.length === 0 ? (
+        <p className="text-sm text-gray-500">
+          No tasks assigned
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {tasks.map((task) => (
+            <div
+              key={task._id}
+              className="flex justify-between items-center border-b pb-2"
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                <p className="text-sm font-medium">
+                  {task.title}
+                </p>
+              </div>
 
-        {/* Task 2 */}
-        <div className="flex justify-between items-center border-b pb-2">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-            <p className="text-sm font-medium">Code Review Meeting</p>
-          </div>
-          <span className="text-xs bg-blue-500 text-white px-3 py-1 rounded">
-            Due Tomorrow
-          </span>
+              <span className="text-xs bg-orange-500 text-white px-3 py-1 rounded">
+                Last Date: {getDueLabel(task.endDate)}
+              </span>
+            </div>
+          ))}
         </div>
-
-        {/* Task 3 */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-            <p className="text-sm font-medium">
-              Client Presentation Prep
-            </p>
-          </div>
-          <span className="text-xs bg-orange-400 text-white px-3 py-1 rounded">
-            Due in 2 Days
-          </span>
-        </div>
-      </div>
+      )}
 
       {/* Bottom Button */}
       <div className="mt-6 text-center">

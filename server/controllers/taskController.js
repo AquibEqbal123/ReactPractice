@@ -10,6 +10,8 @@ export const getAdminTasks = async (req, res) => {
       assignedBy: req.user.id,
     })
       .populate("employee", "name email")
+      .populate("department", "name")   // ✅ YAHAN ADD KARNA HAI
+
       .sort({ createdAt: -1 });
 
     res.json(tasks);
@@ -22,7 +24,7 @@ export const getAdminTasks = async (req, res) => {
 // ✅ Create task (IMPORTANT FIX)
 export const createTask = async (req, res) => {
   try {
-    const { title, description, priority, employeeId, startDate, endDate } =
+    const { title, description, priority, employeeId, startDate, departmentId, endDate, CodeReviewMeeting, ClientPresentationPrep } =
       req.body;
 
     const task = await Task.create({
@@ -33,6 +35,9 @@ export const createTask = async (req, res) => {
       assignedBy: req.user.id,   // 🔥 admin ref
       startDate,
       endDate,
+      department: departmentId,   // ✅ SAVE DEPT
+      CodeReviewMeeting,
+      ClientPresentationPrep,
       status: "assigned",        // 🔥 DEFAULT STATUS
     });
 
@@ -59,6 +64,8 @@ export const deleteTask = async (req, res) => {
 
 /* ================= EMPLOYEE ================= */
 
+/* ================= EMPLOYEE ================= */
+
 export const getEmployeeTasks = async (req, res) => {
   try {
     const employee = await Employee.findOne({ user: req.user.id });
@@ -70,7 +77,9 @@ export const getEmployeeTasks = async (req, res) => {
     const tasks = await Task.find({
       employee: employee._id,
       isDeleted: { $ne: true },
-    }).populate("employee", "name email");
+    })
+      .populate("employee", "name email")
+      .sort({ createdAt: -1 }); // ✅ NEW TASK FIRST
 
     res.json(tasks);
   } catch (err) {
@@ -78,6 +87,7 @@ export const getEmployeeTasks = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // ✅ ACCEPT TASK
 export const acceptTask = async (req, res) => {

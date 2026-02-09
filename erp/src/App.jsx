@@ -14,12 +14,15 @@ import LeaveRequests from "./pages/Admin/LeaveRequests";
 import AssignTasks from "./pages/Admin/AssignTasks";
 import Departments from "./pages/Admin/Departments";
 import Announcements from "./pages/Admin/Announcements";
+import AttendanceAdmin from "./pages/Admin/AttendanceAdmin";
 
 // Employee components
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard";
 import Profile from "./pages/Employee/Profile";
 import Tasks from "./pages/Employee/Tasks";
 import Leave from "./pages/Employee/Leave";
+import Attendance from "./pages/Employee/Attendance";
+
 
 import DashboardLayout from "./layouts/DashboardLayout";
 import AdTopbar from "./components/AdTopbar";
@@ -58,6 +61,7 @@ function App() {
           <Route path="/assign-tasks" element={<AssignTasks />} />
           <Route path="/departments" element={<Departments />} />
           <Route path="/announcements" element={<Announcements />} />
+          <Route path="/attendance-admin" element={<AttendanceAdmin />} />
         </Route>
 
       </Route>
@@ -86,6 +90,7 @@ function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="leave" element={<Leave />} />
+          <Route path="attendance" element={<Attendance />} />
         </Route>
       </Route>
 

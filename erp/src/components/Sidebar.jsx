@@ -5,6 +5,7 @@ import {
   FaTasks,
   FaCalendarAlt,
 } from "react-icons/fa";
+import { FaClipboardCheck } from "react-icons/fa";
 
 export default function EmployeeSidebar() {
   const location = useLocation();
@@ -30,6 +31,12 @@ export default function EmployeeSidebar() {
       path: "/employee/leave",
       icon: <FaCalendarAlt />,
     },
+
+    {
+      name: "Attendance",
+      path: "/employee/attendance",
+      icon: <FaClipboardCheck />,
+    }
   ];
 
   return (

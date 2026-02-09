@@ -48,6 +48,11 @@ export default function DashboardLayout() {
             icon={<Megaphone size={18} />}
             text="Announcements"
           />
+          <NavItem
+            to="/attendance-admin"
+            icon={<FaChartLine />}
+            text="Attendance"
+          />
 
         </nav>
 
@@ -75,7 +80,7 @@ function NavItem({ to, icon, text }) {
   return (
     <Link
       to={to}
-      className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-800 hover:text-white transition-colors"
+      className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-200 hover:text-black transition-colors"
     >
       {icon}
       <span>{text}</span>

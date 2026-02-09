@@ -381,7 +381,7 @@ export default function Employees() {
         <select
           value={graphDepartment}
           onChange={(e) => setGraphDepartment(e.target.value)}
-          className="border px-3 py-2 rounded"
+          className="shadow-md  px-3 py-2 rounded focus:outline-none focus:ring-0 focus:border-gray-300"
         >
           <option value="All">All Departments</option>
 
@@ -396,7 +396,7 @@ export default function Employees() {
         <select
           value={graphStatus}
           onChange={(e) => setGraphStatus(e.target.value)}
-          className="border px-3 py-2 rounded"
+          className="shadow-md px-3 py-2 rounded focus:outline-none focus:ring-0 focus:border-gray-300"
         >
           <option value="All">All Status</option>
           <option value="Active">Active</option>

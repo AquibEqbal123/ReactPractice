@@ -34,9 +34,9 @@ export default function EmployeeDashboard() {
             <Announcements />
           </div>
 
-          <div className="col-span-12 lg:col-span-3">
+          {/* <div className="col-span-12 lg:col-span-3">
             <Payslip />
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
