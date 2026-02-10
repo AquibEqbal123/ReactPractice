@@ -2,6 +2,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 import ModernCalendar from "../../components/ModernCalendar";
 import EmployeeStatus from "../../components/EmployeeStatus";
 import React, { useState, useEffect } from "react";
+import axiosInstance from "../../utils/axiosInstance";
 
 
 
@@ -29,6 +30,28 @@ export default function AttendanceDashboard() {
 
         fetchDepartments();
     }, []);
+
+
+    // For employee list in backlog
+    const [employees, setEmployees] = useState([]);
+
+    // Fetch employees on mount
+    useEffect(() => {
+        const fetchEmployees = async () => {
+            try {
+                const res = await axiosInstance.get("/attendance/active");
+                setEmployees(res.data);
+            } catch (err) {
+                console.log(err);
+            }
+        };
+
+        fetchEmployees();
+    }, []);
+
+
+
+
 
 
     return (
@@ -102,7 +125,7 @@ export default function AttendanceDashboard() {
 
 
             <div className="col-span-3 ml-10">
-                <EmployeeStatus />
+                <EmployeeStatus employees={employees} />
             </div>
 
         </div>

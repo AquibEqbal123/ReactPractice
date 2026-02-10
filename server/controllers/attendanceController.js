@@ -7,16 +7,13 @@ const today = () => new Date().toISOString().split("T")[0];
 export const punchIn = async (req, res) => {
   try {
     const userId = req.user.id;
+    const currentDate = today();
 
-    const date = new Date();
-    const today = date.toISOString().split("T")[0];
-
-    const exists = await Attendance.findOne({ userId, date: today });
+    const exists = await Attendance.findOne({ userId, date: currentDate });
     if (exists)
       return res.status(400).json({ message: "Already punched in today" });
 
-    // ===== FIXED OFFICE TIME (9:30 AM) =====
-    const officeTime = new Date(date);
+    const officeTime = new Date();
     officeTime.setHours(9, 30, 0, 0);
 
     const punchTime = new Date();
@@ -25,13 +22,13 @@ export const punchIn = async (req, res) => {
     let isLate = false;
 
     if (punchTime > officeTime) {
-      lateMinutes = Math.floor((punchTime - officeTime) / 1000 / 60);
+      lateMinutes = Math.floor((punchTime - officeTime) / 60000);
       isLate = true;
     }
 
     const record = await Attendance.create({
       userId,
-      date: today,
+      date: currentDate,
       punchIn: punchTime,
       lateMinutes,
       isLate
@@ -45,35 +42,29 @@ export const punchIn = async (req, res) => {
 };
 
 
-
 // ================= PUNCH OUT =================
 export const punchOut = async (req, res) => {
   try {
     const userId = req.user.id;
-    const today = new Date().toISOString().split("T")[0];
+    const currentDate = today();
 
-    const record = await Attendance.findOne({ userId, date: today });
+    const record = await Attendance.findOne({ userId, date: currentDate });
 
-    if (!record || !record.punchIn)
+    if (!record)
       return res.status(400).json({ message: "Punch in first" });
 
     const punchOutTime = new Date();
 
     const workedMinutes = Math.floor(
-      (punchOutTime - record.punchIn) / 1000 / 60
+      (punchOutTime - record.punchIn) / 60000
     );
 
-    // ===== OVERTIME LOGIC =====
     const officeMinutes = 8 * 60;
-
-    let overtime = 0;
-    if (workedMinutes > officeMinutes) {
-      overtime = workedMinutes - officeMinutes;
-    }
 
     record.punchOut = punchOutTime;
     record.totalMinutes = workedMinutes;
-    record.overtimeMinutes = overtime;
+    record.overtimeMinutes =
+      workedMinutes > officeMinutes ? workedMinutes - officeMinutes : 0;
 
     await record.save();
 
@@ -85,11 +76,18 @@ export const punchOut = async (req, res) => {
 };
 
 
-
-// ================= GET MY ATTENDANCE =================
+// ================= MY ATTENDANCE =================
 export const getMyAttendance = async (req, res) => {
-  const data = await Attendance.find({ userId: req.user.id })
-    .sort({ date: -1 });
+  try {
+    const data = await Attendance.find({ userId: req.user.id })
+      .populate("userId", "name avatar department")
+      .sort({ date: -1 });
 
-  res.json(data);
+    res.json(data);
+
+  } catch (err) {
+    console.error("MY ATTENDANCE ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
 };
+

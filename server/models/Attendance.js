@@ -1,16 +1,20 @@
 import mongoose from "mongoose";
 
 const attendanceSchema = new mongoose.Schema({
-    userId: {
+    employeeId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Employee",
         required: true
     },
 
+
     date: {
-        type: String, // YYYY-MM-DD
+        type: String,
         required: true
     },
+
+    punchIn: Date,
+    punchOut: Date,
 
     lateMinutes: {
         type: Number,
@@ -22,24 +26,14 @@ const attendanceSchema = new mongoose.Schema({
         default: false
     },
 
-
-    punchIn: Date,
-    punchOut: Date,
-
-    overtimeMinutes: {
-        type: Number,
-        default: 0
-    },
-
-
     totalMinutes: {
         type: Number,
         default: 0
     },
 
-    status: {
-        type: String,
-        default: "Present"
+    overtimeMinutes: {
+        type: Number,
+        default: 0
     }
 
 }, { timestamps: true });

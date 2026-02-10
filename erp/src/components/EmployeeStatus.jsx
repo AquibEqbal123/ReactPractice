@@ -1,53 +1,12 @@
 import React from "react";
+import { Search } from "lucide-react";
 
-const employees = [
-  {
-    name: "Brett Johnson",
-    role: "UI Designer",
-    type: "Regular",
-    time: "9:18 AM",
-    status: "late",
-    img: "",
-  },
-  {
-    name: "Brett Johnson",
-    role: "Software Engineer",
-    type: "Regular",
-    time: "9:15 AM",
-    status: "late",
-    img: "",
-  },
-  {
-    name: "Rhodes Peter",
-    role: "Project Manager",
-    type: "Regular",
-    time: "9:05 AM",
-    status: "late",
-    img: "",
-  },
-  {
-    name: "Jeff Jane",
-    role: "HR Head",
-    type: "Regular",
-    time: "9:00 AM",
-    status: "ontime",
-    img: "",
-  },
-  {
-    name: "Emily Butler",
-    role: "Data Scientist",
-    type: "Vendor",
-    time: "8:55 AM",
-    status: "ontime",
-    img: "",
-  },
-];
+export default function EmployeeStatus({ employees = [] }) {
 
-export default function EmployeeStatus() {
+
   return (
     <div className="w-90 bg-white rounded-2xl shadow-md p-4 space-y-4">
 
-      {/* Header */}
       <div className="flex justify-between items-center text-sm font-medium">
         <p>Select Department</p>
         <span>▼</span>
@@ -56,10 +15,14 @@ export default function EmployeeStatus() {
       {/* Tabs */}
       <div className="flex gap-4 text-sm border-b">
         <p className="border-b-2 border-blue-500 pb-2 font-semibold">
-          Logged in (110)
+          Working ({employees.length})
         </p>
-        <p className="text-gray-400">On Time (80)</p>
-        <p className="text-gray-400">Late (30)</p>
+        <p className="text-gray-400">
+          On Time ({employees.filter(e => e.status === "ontime").length})
+        </p>
+        <p className="text-gray-400">
+          Late ({employees.filter(e => e.status === "late").length})
+        </p>
       </div>
 
       {/* Search */}
@@ -68,46 +31,65 @@ export default function EmployeeStatus() {
           placeholder="Search employees"
           className="flex-1 outline-none"
         />
-        🔍
+        <Search className="text-gray-400" size={16} />
       </div>
 
-      <p className="text-blue-500 text-sm cursor-pointer">
-        View all employees
-      </p>
+      {/* EMPLOYEE LIST WITH SCROLL */}
+      <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1">
 
-      {/* Employee List */}
-      <div className="space-y-4">
-        {employees.map((emp, i) => (
-          <div key={i} className="flex justify-between items-center">
+        {employees.length === 0 && (
+          <p className="text-gray-400 text-sm">No employees punched in</p>
+        )}
 
-            <div className="flex items-center gap-3">
-              <img
-                src={emp.img}
-                className="w-10 h-10 rounded-full object-cover"
-              />
+        {employees.map(row => {
+          const emp = row.userId; // 👈 populate ke baad yahi hoga
 
-              <div>
-                <p className="font-semibold text-sm">{emp.name}</p>
-                <p className="text-xs text-gray-400">
-                  {emp.role} | {emp.type}
-                </p>
-                <p className="text-xs text-gray-400">
-                  Login - {emp.time}
-                </p>
-                <p className="text-xs text-gray-300">Logout -</p>
+          if (!emp) return null;
+
+          return (
+            <div key={row._id} className="flex justify-between items-center">
+
+              <div className="flex items-center gap-3">
+                {emp.avatar ? (
+                  <img src={emp.avatar} className="w-10 h-10 rounded-full" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-semibold text-sm">
+                    {emp.name?.[0]}
+                  </div>
+                )}
+
+                <div>
+                  <p className="font-semibold text-sm">{emp.name}</p>
+
+                  <p className="text-xs text-gray-400">
+                    {emp.department?.name || "No Department"}
+                  </p>
+
+                  <p className="text-xs text-gray-400">
+                    Punch In – {row.punchIn ? new Date(row.punchIn).toLocaleTimeString() : "-"}
+                  </p>
+
+                  <p className="text-xs text-gray-300">
+                    Punch Out – {row.punchOut ? new Date(row.punchOut).toLocaleTimeString() : "-"}
+                  </p>
+                  
+                </div>
               </div>
+
+              <span
+                className={`text-xs px-2 py-1 rounded-full font-medium ${row.isLate
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-green-100 text-green-700"
+                  }`}
+              >
+                {row.isLate ? "Late" : "On Time"}
+              </span>
             </div>
+          );
+        })}
 
-            <span
-              className={`w-3 h-3 rounded-full ${
-                emp.status === "late"
-                  ? "bg-sky-400"
-                  : "bg-indigo-500"
-              }`}
-            ></span>
 
-          </div>
-        ))}
+
       </div>
     </div>
   );

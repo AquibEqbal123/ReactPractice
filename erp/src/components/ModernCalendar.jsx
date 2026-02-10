@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-const days = ["S", "M", "T", "W", "T", "F", "S"];
+const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 
 export default function ModernCalendar() {
   const [current, setCurrent] = useState(new Date());
@@ -48,8 +49,11 @@ export default function ModernCalendar() {
 
       {/* Days */}
       <div className="grid grid-cols-7 text-center text-gray-400 text-sm mb-2">
-        {days.map(d => <span key={d}>{d}</span>)}
+        {days.map((d, i) => (
+          <span key={i}>{d}</span>
+        ))}
       </div>
+
 
       {/* Dates */}
       <div className="grid grid-cols-7 gap-2 text-center">
